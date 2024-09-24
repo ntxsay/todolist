@@ -1,50 +1,47 @@
-const express = require("express")
-const cors = require("cors")
-const connection = require('./db');
-const req = require("express/lib/request");
-const app = express();
+const http = require('http');
+const app = require('./app');
 
-app.use(cors());
-app.use(express.json());
+const normalizePort = val => {
+    const port = parseInt(val, 10);
 
+    if (isNaN(port)) {
+        return val;
+    }
+    if (port >= 0) {
+        return port;
+    }
+    return false;
+};
+const port = normalizePort(process.env.PORT || '4001');
+app.set('port', port);
 
-app.get('/todos', (req, res) => {
-    connection.query('SELECT * FROM todos', (err, results) => {
-        if (err) {
-            res.status(500).send('Erreur du serveur');
-        } else {
-            res.json(results);
-        }
-    });
+const errorHandler = error => {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+    const address = server.address();
+    const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges.');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use.');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+};
+
+const server = http.createServer(app);
+
+server.on('error', errorHandler);
+server.on('listening', () => {
+    const address = server.address();
+    const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+    console.log('Listening on ' + bind);
 });
 
-
-app.delete('/todos/:id', (req, res) => {
-    const {id} = req.params
-    connection.query("DELETE FROM todos WHERE id = ?", [id], (err, results)=>{
-        if (err) {
-            res.status(500).send('Erreur du serveur');
-        } else {
-            res.status(200).send('TODO supprimée');
-        }
-    })
-})
-
-app.post('/todos', (req, res) => {
-    const {task, actif } = req.body
-
-    connection.query('INSERT INTO todos (task, actif) VALUES (?, ?)', [task, actif || true], (err, results) => {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.status(200).send('TODO supprimée');
-        }
-    })
-})
-
-app.listen(3001, () => {
-    console.log("Oh yeah")
-})
-
-
-// SEQUELIZE https://sequelize.org/
+server.listen(port);

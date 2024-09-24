@@ -1,0 +1,134 @@
+﻿.Overlay {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.Modal {
+  position: relative;
+  width: 33vw;
+  height: 56vh;
+  max-width: 95vw;
+  max-height: 95vh;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: rgba(155, 161, 173, 0.2) 3px 5px 15px 0, rgba(230, 234, 238, 0.2) -3px 3px 3px 3px;
+  padding: 20px 40px;
+
+  @media (max-width: 768px) {
+    width: 95vw;
+    padding: 10px 15px;
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    width: 80vw;
+    padding: 10px 20px;
+  }
+
+  @media (min-width: 1025px) and (max-width: 1440px) {
+    width: 70vw;
+    padding: 10px 30px;
+  }
+
+  @media (max-height: 768px) {
+    height: 95vh;
+  }
+
+  @media (min-height: 769px) and (max-height: 1024px) {
+    height: 85vh;
+  }
+
+
+  .Modal__closeButton {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+
+    &:hover {
+      color: orangered;
+    }
+  }
+
+  .Modal__titleBar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background-color: white;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e5e5;
+
+    @media (max-width: 768px) {
+      padding-bottom: 5px;
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      font-family: Montserrat, sans-serif;
+      font-size: 32px;
+      font-weight: 600;
+      color: rgb(0, 87, 225);
+      margin: 0;
+
+      @media (max-width: 768px) {
+        font-size: 20px;
+      }
+
+      @media (min-width: 769px) and (max-width: 1024px) {
+        font-size: 24px;
+      }
+
+      @media (min-width: 1025px) and (max-width: 1440px) {
+        font-size: 30px;
+      }
+    }
+  }
+
+  .Modal__content {
+    width: 100%;
+    height: calc(100% - 122px);
+    overflow: auto;
+
+
+    
+  }
+
+  .Modal__BottomButtonBar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
+    height: 40px;
+    background-color: white;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+
+    button {
+      background: linear-gradient(#fff, #eee);
+      padding: 8px 10px;
+      margin: 0 1px;
+      border: 1px solid #e0e0e0;
+      border-bottom: 1px solid #cacaca;
+      border-radius: 1px;
+      color: #7a869c;
+      font-size: 18px;
+      font-family: Montserrat, sans-serif;
+      font-weight: 400;
+      line-height: 16px;
+    }
+  }
+}

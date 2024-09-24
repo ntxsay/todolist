@@ -5,19 +5,28 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "sass": "sass --watch src/styles/main.scss:src/styles/index.css --style compressed",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "axios": "^1.7.7",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-modal": "^3.16.1",
+    "react-router-dom": "^6.26.2",
+    "react-router-hash-link": "^2.4.3",
+    "sass": "^1.79.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@types/react-modal": "^3.16.3",
     "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
