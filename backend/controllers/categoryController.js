@@ -1,9 +1,26 @@
 ﻿const {Category, Task} = require('../models');
 exports.getAllCategories = (req, res, next) => {
-    Category.findAll({
-        include: Task
-    })
-        .then(categories => res.status(200).json(categories))
+    Category.findAll()
+        .then(categories => {
+            const categoryPromises = categories.map(category => {
+
+                return Task.count({
+                    where: {
+                        categoryId: category.id
+                    }
+                }).then(countTasks => {
+                    return {
+                        category: category,
+                        countTasks: countTasks
+                    };
+                });
+            });
+            Promise.all(categoryPromises)
+                .then(categoriesWithCounts => {
+                    res.status(200).json(categoriesWithCounts);
+                })
+                .catch(err => res.status(500).json(err));
+        })
         .catch(err => res.status(500).json(err));
 };
 
@@ -25,7 +42,11 @@ exports.getCategoryById = async (req, res, next) => {
 
 exports.createCategory = (req, res, next) => {
     const category = req.body;
-    console.log(category);
+    
+    if (category.name === null || category.name === "") {
+        return res.status(400).json({message: "Le nom de la catégorie ne peut pas être vide"});
+    }
+    
     Category.count({
         where: {
             name: category.name

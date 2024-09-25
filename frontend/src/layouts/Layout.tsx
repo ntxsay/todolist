@@ -40,7 +40,6 @@ const Layout = () => {
     
     return (
         <>
-            <header></header>
             <main>
                 <MenuSidebarComponent onCreateCategory={onOpenCreateCategoryModal} newCategory={editCategoryModalModel}/>
                 <Outlet/>

@@ -1,4 +1,4 @@
-﻿import {ICategorySchema, ITaskSchema} from "../interfaces/ICategorySchema.tsx";
+﻿import {ICategorySchemaWithCountTasks, ITaskSchema} from "../interfaces/ICategorySchema.tsx";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
@@ -12,23 +12,32 @@ interface EditTaskSidebarComponentProps {
     onCancelled: () => void;
     onTaskSaved: (task: ITaskSchema) => void;
     onTaskDeleted: (task: ITaskSchema) => void;
-    newTask: ITaskSchema;
+    taskModel: ITaskSchema;
 }
 
 const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props) => {
 
-    const [task, setTask] = useState<ITaskSchema>(props.newTask);
-    const [categories, setCategories] = useState<ICategorySchema[]>([]);
+    console.log(props)
+    const [task, setTask] = useState<ITaskSchema>(props.taskModel);
+
+    const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
+    
     useEffect(() => {
-        axios.get<ICategorySchema[]>(`${import.meta.env.VITE_API_URL}/api/categories`)
+        axios.get<ICategorySchemaWithCountTasks[]>(`${import.meta.env.VITE_API_URL}/api/categories`)
             .then(response => {
                 setCategories(response.data)
             })
             .catch(error => {
                 console.error(error);
             });
+        
     }, []);
+    
+    useEffect(() => {
+        setTask({...props.taskModel, beginDate: new Date(props.taskModel.beginDate).toISOString().slice(0, 16), endDate: new Date(props.taskModel.endDate).toISOString().slice(0, 16)});
+    }, [props.taskModel]);
+
     
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -74,18 +83,35 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
             return;
         }
         
-        axios.post(import.meta.env.VITE_API_URL + "/api/tasks", task)
-        .then((response) => {
-            if (response.status === 201) {
-                props.onTaskSaved(task);
-                setTask(props.newTask);
-                setErrorMessage("");
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-            setErrorMessage(error.response.data.message);
-        });
+        if (task.id <= 0) {
+            axios.post(import.meta.env.VITE_API_URL + "/api/tasks", task)
+                .then((response) => {
+                    if (response.status === 201) {
+                        props.onTaskSaved(task);
+                        setTask(props.taskModel);
+                        setErrorMessage("");
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setErrorMessage(error.response.data.message);
+                });
+        }
+        else {
+            axios.put(import.meta.env.VITE_API_URL + "/api/tasks/" + task.id, task)
+                .then((response) => {
+                    if (response.status === 200) {
+                        props.onTaskSaved(task);
+                        setTask(props.taskModel);
+                        setErrorMessage("");
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setErrorMessage(error.response.data.message);
+                });
+        }
+        
     }
     
     const onDelete = () => {
@@ -101,7 +127,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
     }
 
     return (
-        <aside id={"rightMainPanel" + (props.isOpen ? " --isOpen" : "")}>
+        <aside id={"rightMainPanel"} className={(props.isOpen ? " --isOpen" : "")}>
             <form className={"taskFormEditor"} onSubmit={onSubmit}>
                 <div className={"taskFormEditor__titleBar"}>
                     <h2 className={"taskFormEditor__titleBar_title"}>{props.isEdit ? "Modifier la tâche" : "Créer une tâche"}</h2>
@@ -129,7 +155,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                             <option value={0}>Sélectionner une catégorie</option>
                             {
                                 categories.map((category) => (
-                                    <option key={category.id} value={category.id}>{category.name}</option>
+                                    <option key={category.category.id} value={category.category.id}>{category.category.name}</option>
                                 ))
                             }
                         </select>

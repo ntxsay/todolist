@@ -12,10 +12,6 @@ const Task = database.define(
         categoryId: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: 'Category',
-                key: 'id'
-            }
         },
         name: {
             type: DataTypes.STRING,

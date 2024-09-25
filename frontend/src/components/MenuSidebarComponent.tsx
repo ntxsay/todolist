@@ -10,7 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios';
 import React, {useState, useEffect} from "react";
-import {ICategorySchema} from "../interfaces/ICategorySchema.tsx";
+import {ICategorySchema, ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
 import {Link} from "react-router-dom";
 interface MenuSidebarComponentProps {
    
@@ -21,7 +21,7 @@ interface MenuSidebarComponentProps {
 const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
 
     const apiUrl = import.meta.env.VITE_API_URL;
-    const [categories, setCategories] = useState<ICategorySchema[]>([]);
+    const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
     useEffect(() => {
         fetchCategories().then();
     }, []);
@@ -29,13 +29,13 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
     useEffect(() => {
         console.log(props.newCategory);
         if (props.newCategory !== null && props.newCategory.id !== 0 && props.newCategory.name !== null && props.newCategory.name !== "") {
-            setCategories([...categories, props.newCategory]);
+            setCategories([...categories, {category: props.newCategory, countTasks: 0}]);
         }
     }, [props.newCategory]);
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get<ICategorySchema[]>(`${apiUrl}/api/categories`);
+            const response = await axios.get<ICategorySchemaWithCountTasks[]>(`${apiUrl}/api/categories`);
             setCategories(response.data)
         } catch (error) {
             console.error(error);
@@ -105,13 +105,13 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                     <ul className={"navigationItemSection_list"}>
                         {
                             categories.map((category) => (
-                                <li className={"navigationItemSection_list_navigationItem"} key={category.id}>
-                                    <Link to={`/tasks/category/${category.id}`}>
+                                <li className={"navigationItemSection_list_navigationItem"} key={category.category.id}>
+                                    <Link to={`/tasks/category/${category.category.id}`}>
                                         <div className={"categoryColor"}
-                                             style={{backgroundColor: category.color}}></div>
-                                        <span>{category.name}</span>
+                                             style={{backgroundColor: category.category.color}}></div>
+                                        <span>{category.category.name}</span>
                                         <div className={"navigationItem_bagde"}>
-                                            <span>{category.Tasks.length}</span>
+                                            <span>{category.countTasks}</span>
                                         </div>
                                     </Link>
                                 </li>
