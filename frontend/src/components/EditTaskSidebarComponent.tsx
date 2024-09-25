@@ -79,15 +79,12 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     </div>
                 </div>
                 <div className={"taskFormEditor__buttonBar"}>
-                    <button type={"submit"}>
+                    <button type={"submit"} className={"taskFormEditor__buttonBar_saveButton"}>
                         <span>Enregistrer</span>
-                    </button>
-                    <button onClick={props.onCreateTask}>
-                        <span>Annuler</span>
                     </button>
                     {
                         props.isEdit &&
-                        <button onClick={props.onCreateTask}>
+                        <button onClick={props.onCreateTask} className={"taskFormEditor__buttonBar_deleteButton"}>
                             <span>Supprimer</span>
                         </button>
                     }
