@@ -40,6 +40,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     <div className={"taskFormEditor_item taskFormEditor__name"}>
                         <label htmlFor={"taskName"}>Nom de la tâche</label>
                         <input type={"text"} name={"taskName"} id={"taskName"} value={props.newTask.name}
+                               placeholder={"Entrez le nom de la tâche"}
                                onChange={(e) => setTask({...task, name: e.target.value})} required/>
                     </div>
                     <div className={"taskFormEditor_item taskFormEditor__description"}>
@@ -51,7 +52,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                         <label htmlFor={"taskCategory"}>Catégorie</label>
                         <select name={"taskCategory"} id={"taskCategory"} value={props.newTask.categoryId}
                                 onChange={(e) => setTask({...task, categoryId: Number(e.target.value)})}>
-                            <option value={0}>Aucune</option>
+                            <option value={0}>Sélectionner une catégorie</option>
                             {
                                 categories.map((category) => (
                                     <option key={category.id} value={category.id}>{category.name}</option>
