@@ -1,15 +1,15 @@
 ﻿#rightMainPanel {
   display: grid;
   padding: 20px;
-  Width:calc(400px - 40px);
-  
+  Width: calc(400px - 40px);
+
   .taskFormEditor {
     width: 100%;
     height: 100%;
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 20px;
-    
+
     .taskFormEditor__titleBar {
       display: flex;
       flex-direction: row;
@@ -18,7 +18,7 @@
       gap: 20px;
       padding-bottom: 20px;
       border-bottom: 1px solid #e5e5e5;
-      
+
       .taskFormEditor__titleBar_title {
         font-size: 24px;
         font-family: Montserrat, sans-serif;
@@ -27,7 +27,7 @@
         margin: 0;
         padding: 0;
       }
-      
+
       .taskFormEditor__titleBar_button {
         background-color: transparent;
         border: none;
@@ -35,13 +35,13 @@
         font-size: 24px;
         color: #212529;
         padding: 0;
-        
+
         &:hover {
           color: #212529;
           background-color: transparent;
           transform: scale(1.1);
         }
-        
+
         &:focus {
           outline: none;
           border: none;
@@ -50,7 +50,7 @@
         }
       }
     }
-    
+
     .taskFormEditor__content {
       width: 100%;
       height: calc(100% - 2px);
@@ -58,8 +58,8 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      gap: 40px;
-      
+      gap: 35px;
+
       .taskFormEditor_item {
         width: 100%;
         display: flex;
@@ -67,7 +67,7 @@
         align-items: stretch;
         justify-content: center;
         gap: 5px;
-        
+
         label {
           font-size: 16px;
           font-family: Montserrat, sans-serif;
@@ -76,7 +76,7 @@
           margin: 0;
           padding: 0;
         }
-        
+
         input, textarea {
           border: 1px solid #e5e5e5;
           border-radius: 5px;
@@ -86,19 +86,17 @@
           background-color: #f4f4f4;
           color: #212529;
         }
-        
-        input[type="text"]{
-          height: 80px;
-          line-height: 40px; /* Ajuste la hauteur de la ligne à l'intérieur */
-          padding: 0 10px; /* Ajuste l'espacement interne (haut, bas, gauche, droite) */
-          box-sizing: border-box; /* Inclure le padding dans la hauteur totale */
-        }
-        
+
         textarea {
           height: 100px;
           resize: none;
         }
         
+        #taskName {
+          height: 80px;
+          resize: none;
+        }
+
         select {
           border: 1px solid #e5e5e5;
           border-radius: 5px;
@@ -107,22 +105,45 @@
           font-family: Montserrat, sans-serif;
           background-color: #f4f4f4;
         }
-        
+
         input[type="datetime-local"] {
           padding: 10px;
           font-size: 16px;
           font-family: Montserrat, sans-serif;
         }
       }
+      
+      .taskFormEditor__validation {
+        display: none;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 16px;
+        font-family: Montserrat, sans-serif;
+        border: 1px solid #ff1493;
+        background-color: #fff3f3;
+        color: #ff1493;
+        
+        p {
+          margin: 3px 0;
+        }
+
+        &.--hasErrors {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 10px;
+        }
+      }
     }
-    
+
     .taskFormEditor__buttonBar {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       padding-top: 20px;
       border-top: 1px solid #e5e5e5;
-      
+
       button {
         display: flex;
         align-items: center;
@@ -133,12 +154,22 @@
         cursor: inherit;
         height: 48px;
       }
-      
+
       button.taskFormEditor__buttonBar_saveButton {
         background-color: rgb(255, 212, 59);
         border-radius: 6px;
         box-shadow: rgba(0, 0, 0, 0.08) 0 0 0;
         border: 0;
+        font-size: 16px;
+        font-family: Montserrat, sans-serif;
+        font-weight: 600;
+      }
+
+      button.taskFormEditor__buttonBar_deleteButton {
+        background-color: #f4f4f4;
+        border-radius: 6px;
+        box-shadow: rgba(0, 0, 0, 0.08) 0 0 0;
+        border: 1px solid #e5e5e5;
         font-size: 16px;
         font-family: Montserrat, sans-serif;
         font-weight: 600;

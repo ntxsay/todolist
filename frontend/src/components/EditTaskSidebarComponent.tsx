@@ -8,7 +8,10 @@ import {
 
 interface EditTaskSidebarComponentProps {
     isEdit: boolean;
+    onCancelled: () => void;
     onCreateTask: () => void;
+    onTaskSaved: (task: ITaskSchema) => void;
+    onTaskDeleted: (task: ITaskSchema) => void;
     newTask: ITaskSchema;
 }
 
@@ -26,13 +29,71 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                 console.error(error);
             });
     }, []);
+    
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        
+        if (task.name === null || task.name === "") {
+            setErrorMessage("Le nom de la tâche ne peut pas être vide");
+            return;
+        }
+
+        const regex = /^\s*$/;
+        if ( regex.test(task.name) ) {
+            setErrorMessage("Le nom de la tâche ne peut pas contenir que des espaces blancs");
+            return;
+        }
+        
+        if (task.description !== undefined && regex.test(task.description)) {
+            setErrorMessage("La description ne peut pas contenir que des espaces blancs");
+            return;
+        }
+        
+        if (task.beginDate === null || task.beginDate === "") {
+            setErrorMessage("La date de début ne peut pas être vide");
+            return;
+        }
+        
+        if (task.endDate === null || task.endDate === "") {
+            setErrorMessage("La date de fin ne peut pas être vide");
+            return;
+        }
+        
+        if (task.beginDate > task.endDate) {
+            setErrorMessage("La date de début doit être inférieure à la date de fin");
+            return;
+        }
+        
+        if (task.beginDate === task.endDate) {
+            setErrorMessage("La date de début et la date de fin ne peuvent pas être identiques");
+            return;
+        }
+        
+        if (task.categoryId === 0) {
+            setErrorMessage("Vous devez sélectionner une catégorie");
+            return;
+        }
+        
+        axios.post(import.meta.env.VITE_API_URL + "/api/tasks", task)
+        .then((response) => {
+            if (response.status === 201) {
+                props.onTaskSaved(task);
+                setTask(props.newTask);
+                setErrorMessage("");
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            setErrorMessage(error.response.data.message);
+        });
+    }
 
     return (
         <aside id={"rightMainPanel"}>
-            <form className={"taskFormEditor"}>
+            <form className={"taskFormEditor"} onSubmit={onSubmit}>
                 <div className={"taskFormEditor__titleBar"}>
                     <h2 className={"taskFormEditor__titleBar_title"}>{props.isEdit ? "Modifier la tâche" : "Créer une tâche"}</h2>
-                    <button className={"taskFormEditor__titleBar_button"} onClick={props.onCancelled}>
+                    <button className={"taskFormEditor__titleBar_button"} onClick={props.onCancelled} title={"Annuler"}>
                         <FontAwesomeIcon icon={faXmark}/>
                     </button>
                 </div>
@@ -74,7 +135,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                                onChange={(e) => setTask({...task, endDate: e.target.value})} required/>
                     </div>
                     <div
-                        className={"taskFormEditor_item taskFormEditor__validation" + (errorMessage === "" ? "" : " --hasErrors")}>
+                        className={"taskFormEditor__validation" + (errorMessage === "" ? "" : " --hasErrors")}>
                         <p>{errorMessage}</p>
                     </div>
                 </div>
