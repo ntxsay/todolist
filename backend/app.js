@@ -1,7 +1,6 @@
 ﻿const express = require("express")
 const cors = require("cors")
 const connection = require('./db');
-const sequelize = require('./sequelize');
 const req = require("express/lib/request");
 const app = express();
 const categoryRoutes = require("./routes/categoryRoutes");

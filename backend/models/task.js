@@ -1,8 +1,8 @@
 ﻿const { DataTypes } = require('sequelize');
-const sequelize = require('../sequelize.js');
+const database = require('../database.js');
 const categoryModel = require('./category.js');
 const tableName = 'ttask';
-const Task = sequelize.define(
+const Task = database.define(
     'Task',
     {
         id: {
@@ -13,6 +13,10 @@ const Task = sequelize.define(
         categoryId: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            references: {
+                model: 'Category',
+                key: 'id'
+            }
         },
         name: {
             type: DataTypes.STRING,
@@ -42,26 +46,7 @@ const Task = sequelize.define(
     },
 );
 
-Task.belongsTo(categoryModel, {
-    foreignKey: 'categoryId',
-    targetKey: 'id',
-});
-Task.sync({ force: false })
-    .then(() => {
-        return Task.findOrCreate({
-            where: { name: 'Déposer les travaux au bureau' },
-            defaults: { categoryId: 1, endDate: new Date(2023, 1, 1, 12, 0, 0), description: 'Correspond à des tâches qui concernent le travail' },
-        });
-    })
-    .then(([task, created]) => {
-        if (created) {
-            console.log('La tâche "Déposer les travaux au bureau" a été créée.');
-        } else {
-            console.log('La tâche "Déposer les travaux au bureau" existe déjà.');
-        }
-    })
-    .catch(error => console.error(error));
 
 // `sequelize.define` also returns the model
-console.log(Task === sequelize.models.Task); // true
+console.log(Task === database.models.Task); // true
 module.exports = Task
