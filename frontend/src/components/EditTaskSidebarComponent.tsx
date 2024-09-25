@@ -39,18 +39,19 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                 <div className={"taskFormEditor__content"}>
                     <div className={"taskFormEditor_item taskFormEditor__name"}>
                         <label htmlFor={"taskName"}>Nom de la tâche</label>
-                        <input type={"text"} name={"taskName"} id={"taskName"} value={props.newTask.name}
+                        <textarea wrap={"soft"} name={"taskName"} id={"taskName"} value={task.name}
                                placeholder={"Entrez le nom de la tâche"}
                                onChange={(e) => setTask({...task, name: e.target.value})} required/>
                     </div>
                     <div className={"taskFormEditor_item taskFormEditor__description"}>
                         <label htmlFor={"taskDescription"}>Description</label>
-                        <textarea name={"taskDescription"} id={"taskDescription"} value={props.newTask.description}
+                        <textarea name={"taskDescription"} id={"taskDescription"} value={task.description}
+                                  placeholder={"Entrez la description"}
                                   onChange={(e) => setTask({...task, description: e.target.value})}></textarea>
                     </div>
                     <div className={"taskFormEditor_item taskFormEditor__category"}>
                         <label htmlFor={"taskCategory"}>Catégorie</label>
-                        <select name={"taskCategory"} id={"taskCategory"} value={props.newTask.categoryId}
+                        <select name={"taskCategory"} id={"taskCategory"} value={task.categoryId}
                                 onChange={(e) => setTask({...task, categoryId: Number(e.target.value)})}>
                             <option value={0}>Sélectionner une catégorie</option>
                             {
@@ -63,13 +64,13 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     <div className={"taskFormEditor_item taskFormEditor__beginDate"}>
                         <label htmlFor={"taskBeginDate"}>Date de début</label>
                         <input type={"datetime-local"} name={"taskBeginDate"} id={"taskBeginDate"}
-                               value={props.newTask.beginDate}
+                               value={task.beginDate}
                                onChange={(e) => setTask({...task, beginDate: e.target.value})} required/>
                     </div>
                     <div className={"taskFormEditor_item taskFormEditor__endDate"}>
                         <label htmlFor={"taskEndDate"}>Date de fin</label>
                         <input type={"datetime-local"} name={"taskEndDate"} id={"taskEndDate"}
-                               value={props.newTask.endDate}
+                               value={task.endDate}
                                onChange={(e) => setTask({...task, endDate: e.target.value})} required/>
                     </div>
                     <div
@@ -77,7 +78,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                         <p>{errorMessage}</p>
                     </div>
                 </div>
-                <div className={"taskFormEditor_item taskFormEditor__buttonBar"}>
+                <div className={"taskFormEditor__buttonBar"}>
                     <button type={"submit"}>
                         <span>Enregistrer</span>
                     </button>

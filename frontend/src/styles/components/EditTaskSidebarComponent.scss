@@ -53,13 +53,12 @@
     
     .taskFormEditor__content {
       width: 100%;
-      height: calc(100% - 122px);
+      height: calc(100% - 2px);
       overflow: auto;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      gap: 20px;
-      background-color: white;
+      gap: 40px;
       
       .taskFormEditor_item {
         width: 100%;
@@ -84,6 +83,15 @@
           padding: 10px;
           font-size: 16px;
           font-family: Montserrat, sans-serif;
+          background-color: #f4f4f4;
+          color: #212529;
+        }
+        
+        input[type="text"]{
+          height: 80px;
+          line-height: 40px; /* Ajuste la hauteur de la ligne à l'intérieur */
+          padding: 0 10px; /* Ajuste l'espacement interne (haut, bas, gauche, droite) */
+          box-sizing: border-box; /* Inclure le padding dans la hauteur totale */
         }
         
         textarea {
@@ -97,6 +105,7 @@
           padding: 10px;
           font-size: 16px;
           font-family: Montserrat, sans-serif;
+          background-color: #f4f4f4;
         }
         
         input[type="datetime-local"] {
@@ -104,6 +113,32 @@
           font-size: 16px;
           font-family: Montserrat, sans-serif;
         }
+      }
+    }
+    
+    .taskFormEditor__buttonBar {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 20px;
+      height: 40px;
+      background-color: white;
+      padding-top: 20px;
+      border-top: 1px solid #e5e5e5;
+      
+      button {
+        background: linear-gradient(#fff, #eee);
+        padding: 8px 10px;
+        margin: 0 1px;
+        border: 1px solid #e0e0e0;
+        border-bottom: 1px solid #cacaca;
+        border-radius: 1px;
+        color: #7a869c;
+        font-size: 18px;
+        font-family: Montserrat, sans-serif;
+        font-weight: 400;
+        line-height: 16px;
       }
     }
   }
