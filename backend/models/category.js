@@ -1,7 +1,5 @@
 ﻿const { DataTypes } = require('sequelize');
 const database = require('../database.js');
-const taskModel = require('./task.js');
-
 
 const Category = database.define(
     'Category',
@@ -28,6 +26,8 @@ const Category = database.define(
     {
         // Other model options go here
         tableName: 'tcategory',
+        charset: 'utf8',
+        collate: 'utf8_unicode_ci'
     },
 );
 

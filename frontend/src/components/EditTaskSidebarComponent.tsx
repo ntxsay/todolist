@@ -7,9 +7,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 interface EditTaskSidebarComponentProps {
+    isOpen: boolean;
     isEdit: boolean;
     onCancelled: () => void;
-    onCreateTask: () => void;
     onTaskSaved: (task: ITaskSchema) => void;
     onTaskDeleted: (task: ITaskSchema) => void;
     newTask: ITaskSchema;
@@ -87,9 +87,21 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
             setErrorMessage(error.response.data.message);
         });
     }
+    
+    const onDelete = () => {
+        axios.delete(import.meta.env.VITE_API_URL + `/api/tasks/${task.id}`)
+        .then((response) => {
+            if (response.status === 200) {
+                props.onTaskDeleted(task);
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
 
     return (
-        <aside id={"rightMainPanel"}>
+        <aside id={"rightMainPanel" + (props.isOpen ? " --isOpen" : "")}>
             <form className={"taskFormEditor"} onSubmit={onSubmit}>
                 <div className={"taskFormEditor__titleBar"}>
                     <h2 className={"taskFormEditor__titleBar_title"}>{props.isEdit ? "Modifier la tâche" : "Créer une tâche"}</h2>
@@ -145,7 +157,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     </button>
                     {
                         props.isEdit &&
-                        <button onClick={props.onCreateTask} className={"taskFormEditor__buttonBar_deleteButton"}>
+                        <button onClick={onDelete} className={"taskFormEditor__buttonBar_deleteButton"}>
                             <span>Supprimer</span>
                         </button>
                     }
