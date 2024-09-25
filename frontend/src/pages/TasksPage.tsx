@@ -1,6 +1,6 @@
 ﻿import {useLocation, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
-import { ICategorySchemaWithTasks} from "../interfaces/ICategorySchema.tsx";
+import { ICategorySchema} from "../interfaces/ICategorySchema.tsx";
 import axios from "axios";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {
@@ -15,17 +15,17 @@ const TasksPage = () => {
     const path: string  = location.pathname;
     const { id } = useParams<{ id: string }>();
     const [headerTitle, setHeaderTitle] = useState<string>("Aujourd'hui");
-    const [tasks, setTasks] = useState<string[]>([]);
+    //const [tasks, setTasks] = useState<string[]>([]);
     const [countTasks, setCountTasks] = useState<number>(0);
-    const [category, setCategory] = useState<ICategorySchemaWithTasks | null>(null);
+    const [category, setCategory] = useState<ICategorySchema | null>(null);
     useEffect(() => {
         if (path.includes("/tasks/category/") && id !== "") {
             
-            axios.get<ICategorySchemaWithTasks>(import.meta.env.VITE_API_URL + "/api/categories/" + id)
+            axios.get<ICategorySchema>(import.meta.env.VITE_API_URL + "/api/categories/" + id)
                 .then((response) => {
                     setCategory(response.data);
-                    setHeaderTitle(response.data.category.name);
-                    setCountTasks(response.data.countTasks);
+                    setHeaderTitle(response.data.name);
+                    setCountTasks(response.data.Tasks.length);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -58,7 +58,7 @@ const TasksPage = () => {
                         </button>
                     </li>
                     {
-                        category?.tasks.map((task) => (
+                        category?.Tasks.map((task) => (
                             <li key={task.id}>
                                 <input type={"checkbox"} value={task.id} id={`task_${task.id}`}/>
                                 <label htmlFor={`task_${task.id}`}>{task.name}</label>

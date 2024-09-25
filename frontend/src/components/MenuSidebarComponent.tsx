@@ -10,32 +10,32 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios';
 import React, {useState, useEffect} from "react";
-import {ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
+import {ICategorySchema} from "../interfaces/ICategorySchema.tsx";
 import {Link} from "react-router-dom";
 interface MenuSidebarComponentProps {
    
     onCreateCategory: () => void;
-    newCategory: ICategorySchemaWithCountTasks | null;
+    newCategory: ICategorySchema | null;
 }
 
 const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
 
     const apiUrl = import.meta.env.VITE_API_URL;
-    const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
+    const [categories, setCategories] = useState<ICategorySchema[]>([]);
     useEffect(() => {
         fetchCategories().then();
     }, []);
 
     useEffect(() => {
         console.log(props.newCategory);
-        if (props.newCategory !== null && props.newCategory.category.id !== 0 && props.newCategory.category.name !== null && props.newCategory.category.name !== "") {
+        if (props.newCategory !== null && props.newCategory.id !== 0 && props.newCategory.name !== null && props.newCategory.name !== "") {
             setCategories([...categories, props.newCategory]);
         }
     }, [props.newCategory]);
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get<ICategorySchemaWithCountTasks[]>(`${apiUrl}/api/categories`);
+            const response = await axios.get<ICategorySchema[]>(`${apiUrl}/api/categories`);
             setCategories(response.data)
         } catch (error) {
             console.error(error);
@@ -43,7 +43,7 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
     }
 
     return (
-        <aside id={"leftMainPanel"}>
+        <aside id={"leftMainPanel"} >
             <div className={"leftMainPanel_menuContainer"}>
                 <h1>My Todo List</h1>
                 <button>
@@ -105,13 +105,13 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                     <ul className={"navigationItemSection_list"}>
                         {
                             categories.map((category) => (
-                                <li className={"navigationItemSection_list_navigationItem"} key={category.category.id}>
-                                    <Link to={`/tasks/category/${category.category.id}`}>
+                                <li className={"navigationItemSection_list_navigationItem"} key={category.id}>
+                                    <Link to={`/tasks/category/${category.id}`}>
                                         <div className={"categoryColor"}
-                                             style={{backgroundColor: category.category.color}}></div>
-                                        <span>{category.category.name}</span>
+                                             style={{backgroundColor: category.color}}></div>
+                                        <span>{category.name}</span>
                                         <div className={"navigationItem_bagde"}>
-                                            <span>{category.countTasks}</span>
+                                            <span>{category.Tasks.length}</span>
                                         </div>
                                     </Link>
                                 </li>

@@ -5,7 +5,7 @@
     description: string | undefined;
     createdAt: string;
     updatedAt: string;
-    countTasks: number;
+    Tasks: ITaskSchema[];
 }
 
 export interface ICategorySchemaWithCountTasks {
