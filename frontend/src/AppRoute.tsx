@@ -7,6 +7,7 @@ const AppRoutes = () => {
         <Routes>
             <Route path="/" element={<Layout/>}>
                 <Route path="/tasks/category/:id" element={<TasksPage/>}/>
+                <Route path="/tasks" element={<TasksPage/>}/>
                 <Route index element={<TasksPage/>}/>
             </Route>
         </Routes>

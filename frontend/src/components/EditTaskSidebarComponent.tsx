@@ -35,7 +35,8 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
     }, []);
     
     useEffect(() => {
-        setTask({...props.taskModel, beginDate: new Date(props.taskModel.beginDate).toISOString().slice(0, 16), endDate: new Date(props.taskModel.endDate).toISOString().slice(0, 16)});
+        setTask(props.taskModel);
+        //setTask({...props.taskModel, beginDate: new Date(props.taskModel.beginDate).toISOString().slice(0, 16), endDate: new Date(props.taskModel.endDate).toISOString().slice(0, 16)});
     }, [props.taskModel]);
 
     

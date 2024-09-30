@@ -36,6 +36,34 @@
         font-weight: 700;
         font-size: 28px;
       }
+      
+      .contentMainPanel_header_button {
+        width: 56px;
+        height: 50px;
+        border-radius: 5px;
+        border: 1px solid #ebebeb;
+        font-weight: 700;
+        font-size: 28px;
+        background-color: transparent;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        cursor: pointer;
+
+        &.trashButton {
+          color:orangered;
+        }
+        
+        &.editButton {
+          color: orange;
+        }
+        
+        &.hideButton {
+          display: none;
+        }
+      }
     }
 
     .contentMainPanel_content {

@@ -11,7 +11,6 @@ interface EditCategoryModalProps {
     isOpen: boolean;
     isEdit: boolean;
     onCategorySaved: (category: ICategorySchema) => void;
-    //onAfterOpen?: () => void;
     onCancelled?: () => void;
     model:ICategorySchema;
 }
