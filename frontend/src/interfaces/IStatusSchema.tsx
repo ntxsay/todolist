@@ -1,5 +1,5 @@
 ﻿export interface IStatusSchema {
     name: string;
-    icon: string;
+    displayName: string;
     countTasks: number;
 }

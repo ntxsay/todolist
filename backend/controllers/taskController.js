@@ -65,6 +65,7 @@ exports.getTodayTasks = (req, res, next) => {
 
 exports.countStatusTasks = async (req, res, next) => {
     try {
+        console.log('uu');
         const countComingTasks = await Task.count({
             where: {
                 beginDate: {
@@ -89,15 +90,17 @@ exports.countStatusTasks = async (req, res, next) => {
         });
         
         res.status(200).json([
-            {name: "À venir", icon: "fa-calendar-day", countTasks: countComingTasks},
-            {name: "Aujourd'hui", icon: "fa-calendar-check", countTasks: countTodayTasks},
-            {name: "Passées", icon: "fa-calendar-xmark", countTasks: countPastTasks}
+            {name: "coming", countTasks: countComingTasks, displayName: "À venir"},
+            {name: "today", countTasks: countTodayTasks, displayName: "Aujourd'hui"},
+            {name: "past", countTasks: countPastTasks, displayName: "Passées"}
         ]);
     } catch (error) {
         console.error(error);
         res.status(500).json(error);
     }
 };
+
+
 exports.createTask = (req, res, next) => {
     const task = req.body;
     

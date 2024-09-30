@@ -4,7 +4,6 @@ import {
     faMagnifyingGlass,
     faAnglesRight,
     faCalendarDay,
-    faCalendarXmark,
     faCalendarCheck,
     faPlus
 } from '@fortawesome/free-solid-svg-icons'
@@ -12,6 +11,8 @@ import axios from 'axios';
 import React, {useState, useEffect} from "react";
 import {ICategorySchema, ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
 import {Link} from "react-router-dom";
+import {IStatusSchema} from "../interfaces/IStatusSchema.tsx";
+import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
 interface MenuSidebarComponentProps {
    
     onCreateCategory: () => void;
@@ -22,8 +23,16 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
 
     const apiUrl = import.meta.env.VITE_API_URL;
     const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
+    const [statusTasks, setStatusTasks] = useState<IStatusSchema[]>([]);
+    const iconDictionary : { [key: string]: IconDefinition } = {
+        "coming": faAnglesRight,
+        "today": faCalendarDay,
+        "past": faCalendarCheck
+    };
+    
     useEffect(() => {
         fetchCategories().then();
+        fetchStatusTasks().then();
     }, []);
 
     useEffect(() => {
@@ -37,6 +46,15 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
         try {
             const response = await axios.get<ICategorySchemaWithCountTasks[]>(`${apiUrl}/api/categories`);
             setCategories(response.data)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    
+    const fetchStatusTasks = async () => {
+        try {
+            const response = await axios.get<IStatusSchema[]>(`${apiUrl}/api/tasks/status`);
+            setStatusTasks(response.data)
         } catch (error) {
             console.error(error);
         }
@@ -61,42 +79,25 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                 <article id={"tasksContainer"} className={"leftMainPanel_navigationContainer_navigationItemSection"}>
                     <h2 className={"navigationItemSection_title"}>Tâches</h2>
                     <ul className={"navigationItemSection_list"}>
-                        <li className={"navigationItemSection_list_navigationItem selected"}>
-                            <Link to={'/'}>
-                                <FontAwesomeIcon icon={faAnglesRight}/>
-                                <span>Bientôt</span>
-                                <div className={"navigationItem_bagde"}>
-                                    <span>10</span>
-                                </div>
-                            </Link>
-                        </li>
-                        <li className={"navigationItemSection_list_navigationItem"}>
-                            <Link to={'/'}>
-                                <FontAwesomeIcon icon={faCalendarDay}/>
-                                <span>Aujourd'hui</span>
-                                <div className={"navigationItem_bagde"}>
-                                    <span>8</span>
-                                </div>
-                            </Link>
-                        </li>
-                        <li className={"navigationItemSection_list_navigationItem"}>
-                            <Link to={'/'}>
-                                <FontAwesomeIcon icon={faCalendarCheck}/>
-                                <span>Passées</span>
-                                <div className={"navigationItem_bagde"}>
-                                    <span>11</span>
-                                </div>
-                            </Link>
-                        </li>
-                        <li className={"navigationItemSection_list_navigationItem"}>
-                            <Link to={'/'}>
-                                <FontAwesomeIcon icon={faCalendarXmark}/>
-                                <span>Annulées</span>
-                                <div className={"navigationItem_bagde"}>
-                                    <span>0</span>
-                                </div>
-                            </Link>
-                        </li>
+                        {
+                            statusTasks.map((statusTask, index) => {
+                                const icon = iconDictionary[statusTask.name];
+                                if (!icon)
+                                    return;
+
+                                return (
+                                    <li className={"navigationItemSection_list_navigationItem"} key={index}>
+                                        <Link to={`/tasks?status=${statusTask.name}`}>
+                                            <FontAwesomeIcon icon={icon}/>
+                                            <span>{statusTask.displayName}</span>
+                                            <div className={"navigationItem_bagde"}>
+                                                <span>{statusTask.countTasks}</span>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                )
+                            })
+                        }
                     </ul>
                 </article>
                 <article id={"categoriesContainer"}

@@ -1,0 +1,184 @@
+.CategoryEditionModal {
+  position: relative;
+  margin: 0 auto;
+  width: 400px;
+  height: 600px;
+  max-width: 500px;
+  border-radius: 5px;
+  background-color: #f4f4f4;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  
+  .CategoryEditionModal__titleBar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e5e5;
+
+    .CategoryEditionModal__titleBar_title {
+      font-size: 24px;
+      font-family: Montserrat, sans-serif;
+      font-weight: 600;
+      color: #212529;
+      margin: 0;
+      padding: 0;
+    }
+
+    .CategoryEditionModal__titleBar_button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #212529;
+      padding: 0;
+
+      &:hover {
+        color: #212529;
+        background-color: transparent;
+        transform: scale(1.1);
+      }
+
+      &:focus {
+        outline: none;
+        border: none;
+        box-shadow: none;
+        background-color: transparent;
+      }
+    }
+  }
+
+  .CategoryEditionModal__content {
+    width: 100%;
+    height: calc(100% - 122px);
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .CategoryEditionModal__content__message {
+      font-size: 16px;
+      font-family: Montserrat, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .CategoryEditionModal__footer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      overflow: hidden;
+      outline: none;
+      cursor: inherit;
+      height: 48px;
+      padding: 0 20px;
+
+      &.cancelButton {
+        background-color: #CCCCCC;
+        border-radius: 6px;
+        box-shadow: rgba(0, 0, 0, 0.08) 0 0 0;
+        border: 1px solid #e5e5e5;
+        font-size: 16px;
+        font-family: Montserrat, sans-serif;
+        font-weight: 600;
+      }
+
+      &.saveButton {
+        background-color: rgb(255, 212, 59);
+        border-radius: 6px;
+        box-shadow: rgba(0, 0, 0, 0.08) 0 0 0;
+        border: 0;
+        font-size: 16px;
+        font-family: Montserrat, sans-serif;
+        font-weight: 600;
+      }
+    }
+  }
+
+  form {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    
+    .CategoryEditionModal__form_item {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
+      gap: 5px;
+      
+      label {
+        font-size: 16px;
+        font-family: Montserrat, sans-serif;
+        font-weight: 400;
+        color: #212529;
+        margin: 0;
+        padding: 0;
+      }
+      
+      input, textarea {
+        width: calc(100% - 22px);
+        border: 1px solid #e5e5e5;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 16px;
+        font-family: Montserrat, sans-serif;
+        background-color: #f4f4f4;
+        color: #212529;
+      }
+      
+      textarea {
+        height: 80px;
+        resize: none;
+      }
+      
+      input[type="color"] {
+        height: 40px;
+      }
+    }
+
+    .CategoryEditionModal__form_validation {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+
+      p {
+        color: red;
+        background-color: #f4f4f4;
+        font-size: 16px;
+        font-family: Montserrat, sans-serif;
+        margin: 0;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid red;
+      }
+    }
+  }
+}

@@ -32,6 +32,8 @@ const TasksPage = () => {
     const location = useLocation();
     const path: string = location.pathname;
     const {id} = useParams<{ id: string }>();
+    const [searchParams] = useSearchParams();
+
     const [headerTitle, setHeaderTitle] = useState<string>("");
     const [selectedId, setSelectedId] = useState<number[]>([]);
     const [category, setCategory] = useState<ICategorySchema | null>(null);
@@ -57,10 +59,9 @@ const TasksPage = () => {
                 });
         }
         else {
-            const [searchParams] = useSearchParams();
-
-            // Récupération du paramètre 'status' de la requête
             const status = searchParams.get('status');
+            console.log('status');
+            console.log(status);
             axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/" + status)
                 .then((response) => {
                     
@@ -84,7 +85,7 @@ const TasksPage = () => {
                     console.error(error);
                 });
         }
-    }, [id]);
+    }, [id, searchParams]);
 
     const onOpenCreateTaskSidebar = () => {
         setEditTaskModalModel(emptyTask);
