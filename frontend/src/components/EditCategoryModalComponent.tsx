@@ -13,6 +13,7 @@ interface EditCategoryModalProps {
     onCategorySaved: (category: ICategorySchema) => void;
     onCancelled?: () => void;
     model: ICategorySchema;
+    id: string;
 }
 
 const EditCategoryModalComponent: React.FC<EditCategoryModalProps> = (props) => {
@@ -37,17 +38,34 @@ const EditCategoryModalComponent: React.FC<EditCategoryModalProps> = (props) => 
             return;
         }
 
-        axios.post(import.meta.env.VITE_API_URL + "/api/categories", category)
-            .then((response) => {
-                if (response.status === 201) {
-                    props.onCategorySaved(response.data);
+        if (props.isEdit) {
+            axios.put(import.meta.env.VITE_API_URL + "/api/categories/" + props.model.id, category)
+                .then((response) => {
+                    if (response.status === 200) {
+                        props.onCategorySaved(response.data);
+                        setCategory(props.model);
+                        setMessageError("");
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setMessageError(error.response.data.message);
+                });
+        } else {
+            axios.post(import.meta.env.VITE_API_URL + "/api/categories", category)
+                .then((response) => {
+                    if (response.status === 201) {
+                        props.onCategorySaved(response.data);
+                        setCategory(props.model);
+                        setMessageError("");
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setMessageError(error.response.data.message);
                     setCategory(props.model);
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                setMessageError(error.response.data.message);
-            });
+                });
+        }
     }
 
     const onCancel = () => {
@@ -59,7 +77,7 @@ const EditCategoryModalComponent: React.FC<EditCategoryModalProps> = (props) => 
             isOpen={props.isOpen}
             onRequestClose={props.onCancelled}
             className="CategoryEditionModal"
-            id="EditCategoryModal"
+            id={props.id}
             overlayClassName="Overlay">
             <form id={"categoryForm"} onSubmit={onSubmit} className="CategoryEditionModal__form">
                 <div className="CategoryEditionModal__titleBar">

@@ -73,3 +73,34 @@ exports.createCategory = (req, res, next) => {
         })
         .catch(err => res.status(500).json(err));
 };
+
+exports.updateCategory = (req, res, next) => {
+    const category = req.body;
+    const id = req.params.id;
+
+    if (category.name === null || category.name === "") {
+        return res.status(400).json({message: "Le nom de la catégorie ne peut pas être vide"});
+    }
+
+    Category.update(
+        {
+            name: category.name,
+            description: category.description,
+            color: category.color
+        },
+        {where: {id: id}}
+    ).then(result => {
+        console.log(`La catégorie a été mise à jour avec l'id ${req.params.id} a été mise à jour.`);
+        res.status(200).json(result);
+    }).catch(err => {
+        if (err.errors.length > 0) {
+            if (err.errors[0].type === "unique violation" && err.errors[0].path === "color") {
+                res.status(400).json({message: "Cette couleur a déjà été attribuée à une autre catégorie"});
+                return;
+            }
+        }
+        
+        console.error(err);
+        res.status(500).json(err);
+    });
+}

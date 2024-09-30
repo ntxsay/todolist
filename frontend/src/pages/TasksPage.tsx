@@ -1,6 +1,6 @@
 ﻿import {useLocation, useParams, useSearchParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import {ICategorySchema, ITaskSchema} from "../interfaces/ICategorySchema.tsx";
+import {ICategorySchema} from "../interfaces/ICategorySchema.tsx";
 import axios from "axios";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {
@@ -11,6 +11,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import EditTaskSidebarComponent from "../components/EditTaskSidebarComponent.tsx";
 import DeleteMessageModalComponent from "../components/DeleteMessageModalComponent.tsx";
+import {ITaskSchema} from "../interfaces/ITaskSchema.tsx";
+import EditCategoryModalComponent from "../components/EditCategoryModalComponent.tsx";
 
 interface DeleteMessageModalProps {
     isOpen: boolean;
@@ -43,7 +45,7 @@ const TasksPage = () => {
     const [categoryId, setCategoryId] = useState<number>(0);
     const [isEditTaskSidebarOpen, setIsEditTaskSidebarOpen] = useState(false);
     const [deleteTaskModalParams, setDeleteTaskModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
-
+    const [isCategoryEditionModalOpen, setIsCategoryEditionModalOpen] = useState(false);
     useEffect(() => {
         if (path.includes("/tasks/category/") && id !== "") {
 
@@ -167,6 +169,19 @@ const TasksPage = () => {
         setCategory({...category, Tasks: [...category.Tasks.filter(t => t.id !== task.id)]});
     }
 
+    const onOpenCategoryEdition = () => {
+        setIsCategoryEditionModalOpen(true);
+    }
+    
+    const onCategorySaved = (category: ICategorySchema) => {
+        setCategory(category);
+        setIsCategoryEditionModalOpen(false);
+        setHeaderTitle(category.name);
+    }
+    
+    const onCategoryEditionCancelled = () => {
+        setIsCategoryEditionModalOpen(false);
+    }
 
     return (
         <section id={"taskSection"} className={"contentMainPanel"}>
@@ -176,7 +191,7 @@ const TasksPage = () => {
                     <div className={"contentMainPanel_header_badge"}>
                         <span>{tasks.length}</span>
                     </div>
-                    <button className={"contentMainPanel_header_button editButton"}>
+                    <button className={"contentMainPanel_header_button editButton"} onClick={onOpenCategoryEdition}>
                         <FontAwesomeIcon icon={faPen}/>
                     </button>
                     <button className={"contentMainPanel_header_button trashButton" + (selectedId.length === 0 ? " hideButton" : "")} onClick={onOpenDeleteTaskModal}>
@@ -208,6 +223,10 @@ const TasksPage = () => {
                                       onCancelled={onTaskEditionCancelled} onTaskSaved={onTaskSaved}
                                       onTaskDeleted={onTaskDeleted} taskModel={editTaskModalModel}/>
             <DeleteMessageModalComponent isOpen={deleteTaskModalParams.isOpen} onCancelled={onDeleteMessageModalCancelled} onDeleted={onDeleteMessageModalDeleted} message={deleteTaskModalParams.message} title={deleteTaskModalParams.title} id={"deleteTaskModal"}/>
+            {
+                categoryId !== 0 && category !== null &&
+                <EditCategoryModalComponent isOpen={isCategoryEditionModalOpen} onCancelled={onCategoryEditionCancelled} onCategorySaved={onCategorySaved} model={category} isEdit={true} id={"categoryEditionModal2"}/>
+            }
         </section>
     )
 }

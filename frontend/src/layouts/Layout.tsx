@@ -45,7 +45,7 @@ const Layout = () => {
                 <Outlet/>
             </main>
             <EditCategoryModalComponent isOpen={isEditCategoryModalOpen} onCancelled={onCategoryEditionCancelled} onCategorySaved={onCategorySaved} model={editCategoryModalModel}
-            isEdit={editCategoryModalModel.id !== 0}/>
+            isEdit={editCategoryModalModel.id !== 0} id={"categoryEditionModal"}/>
         </>
     );
 }

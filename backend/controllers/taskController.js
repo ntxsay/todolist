@@ -104,29 +104,9 @@ exports.countStatusTasks = async (req, res, next) => {
 exports.createTask = (req, res, next) => {
     const task = req.body;
     
-    if (task.name === null || task.name === "") {
-        return res.status(400).json({message: "Le nom de la tâche ne peut pas être vide"});
-    }
-    
-    if ((task.categoryId <= 0)) {
-        return res.status(400).json({message: "Vous devez sélectionner une catégorie"});
-    }
-    
-    if (task.beginDate === null || task.beginDate === "") {
-        return res.status(400).json({message: "La date de début ne peut pas être vide"});
-    }
-    
-    if (task.endDate === null || task.endDate === "") {
-        return res.status(400).json({message: "La date de fin ne peut pas être vide"});
-    }
-    
-    if (task.beginDate > task.endDate) {
-        return res.status(400).json({message: "La date de début doit être inférieure à la date de fin"});
-    }
-    
-    if (task.beginDate === task.endDate) {
-        return res.status(400).json({message: "La date de début et la date de fin ne peuvent pas être identiques"});
-    }
+    const validation = validateAddingOrUpdatingTask(task);
+    if (!validation.isValid)
+        return res.status(400).json({message: validation.message});
     
     Task.create(task)
         .then(task => res.status(201).json(task))
@@ -137,29 +117,10 @@ exports.updateTask = (req, res, next) => {
     const task = req.body;
     const id = req.params.id;
     
-    if (task.name === null || task.name === "") {
-        return res.status(400).json({message: "Le nom de la tâche ne peut pas être vide"});
-    }
-    
-    if ((task.categoryId <= 0)) {
-        return res.status(400).json({message: "Vous devez sélectionner une catégorie"});
-    }
-    
-    if (task.beginDate === null || task.beginDate === "") {
-        return res.status(400).json({message: "La date de début ne peut pas être vide"});
-    }
-    
-    if (task.endDate === null || task.endDate === "") {
-        return res.status(400).json({message: "La date de fin ne peut pas être vide"});
-    }
-    
-    if (task.beginDate > task.endDate) {
-        return res.status(400).json({message: "La date de début doit être inférieure à la date de fin"});
-    }
-    
-    if (task.beginDate === task.endDate) {
-        return res.status(400).json({message: "La date de début et la date de fin ne peuvent pas être identiques"});
-    }
+    //validation des champs
+    const validation = validateAddingOrUpdatingTask(task);
+    if (validation.isValid === false)
+        return res.status(400).json({message: validation.message});
 
     Task.update(
         { 
@@ -192,3 +153,52 @@ exports.deleteTask = (req, res, next) => {
         res.status(500).json(err);
     });
 };
+
+function validateAddingOrUpdatingTask(task) {
+    if (task.name === null || task.name === "") {
+        return {
+            isValid: false,
+            message: "Le nom de la tâche ne peut pas être vide"
+        };
+    }
+
+    if ((task.categoryId <= 0)) {
+        return {
+            isValid: false,
+            message: "Vous devez sélectionner une catégorie"
+        };
+    }
+
+    if (task.beginDate === null || task.beginDate === "") {
+        return {
+            isValid: false,
+            message: "La date de début ne peut pas être vide"
+        };
+    }
+
+    if (task.endDate === null || task.endDate === "") {
+        return {
+            isValid: false,
+            message: "La date de fin ne peut pas être vide"
+        };
+    }
+
+    if (task.beginDate > task.endDate) {
+        return {
+            isValid: false,
+            message: "La date de début doit être inférieure à la date de fin"
+        };
+    }
+
+    if (task.beginDate === task.endDate) {
+        return {
+            isValid: false,
+            message: "La date de début et la date de fin ne peuvent pas être identiques"
+        };
+    }
+
+    return {
+        isValid: true,
+        message: ""
+    };
+}
