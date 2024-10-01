@@ -1,4 +1,4 @@
-﻿import {useLocation, useParams, useSearchParams} from "react-router-dom";
+﻿import {useLocation, useNavigate, useParams, useSearchParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import {ICategorySchema} from "../interfaces/ICategorySchema.tsx";
 import axios from "axios";
@@ -7,7 +7,8 @@ import {
     faPlus,
     faPen,
     faChevronRight,
-    faTrashCan
+    faTrashCan,
+    faDeleteLeft
 } from '@fortawesome/free-solid-svg-icons'
 import EditTaskSidebarComponent from "../components/EditTaskSidebarComponent.tsx";
 import DeleteMessageModalComponent from "../components/DeleteMessageModalComponent.tsx";
@@ -32,6 +33,7 @@ const TasksPage = () => {
         updatedAt: ""
     };
     const location = useLocation();
+    const navigate = useNavigate();
     const path: string = location.pathname;
     const {id} = useParams<{ id: string }>();
     const [searchParams] = useSearchParams();
@@ -42,9 +44,9 @@ const TasksPage = () => {
 
     const [editTaskModalModel, setEditTaskModalModel] = useState<ITaskSchema>(emptyTask);
     const [tasks, setTasks] = useState<ITaskSchema[]>([]);
-    const [categoryId, setCategoryId] = useState<number>(0);
     const [isEditTaskSidebarOpen, setIsEditTaskSidebarOpen] = useState(false);
     const [deleteTaskModalParams, setDeleteTaskModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
+    const [deleteCategoryModalParams, setDeleteCategoryModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
     const [isCategoryEditionModalOpen, setIsCategoryEditionModalOpen] = useState(false);
     
     
@@ -55,6 +57,7 @@ const TasksPage = () => {
                 .then((response) => {
                     setTasks(response.data);
                     setHeaderTitle("Aujourd'hui");
+                    setCategory(null);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -65,7 +68,6 @@ const TasksPage = () => {
             axios.get<ICategorySchema>(import.meta.env.VITE_API_URL + "/api/categories/" + id)
                 .then((response) => {
                     setCategory(response.data);
-                    setCategoryId(response.data.id);
                     setHeaderTitle(response.data.name);
                     setTasks(response.data.Tasks);
                 })
@@ -93,6 +95,7 @@ const TasksPage = () => {
                             break;
                     }
                     setTasks(response.data);
+                    setCategory(null);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -116,7 +119,7 @@ const TasksPage = () => {
 
         const existingTask = tasks.find(t => t.id === task.id);
         if (existingTask === undefined) {
-            if (categoryId === task.categoryId)
+            if (category !== null && category.id === task.categoryId)
                 setTasks([...tasks, task]);
         } else {
             existingTask.name = task.name;
@@ -131,6 +134,33 @@ const TasksPage = () => {
         setIsEditTaskSidebarOpen(false);
     }
     
+    const onOpenDeleteCategoryModal = () => {
+        if (category === null)
+            return;
+        
+        setDeleteCategoryModalParams({isOpen: true, message: "Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action supprimera toutes les tâches liées.", title: "Suppression de catégorie"});
+    }
+    
+    const onCategoryDeleted = () => {
+        setDeleteCategoryModalParams({isOpen: false, message: "", title: ""});
+        if (category === null)
+            return;
+        
+        axios.delete(import.meta.env.VITE_API_URL + `/api/categories/${category.id}`)
+            .then((response) => {
+                if (response.status === 200) {
+                    navigate("/");
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+    
+    const onCategoryDeletingCancelled = () => {
+        setDeleteCategoryModalParams({isOpen: false, message: "", title: ""});
+    }
+    
     const onOpenDeleteTaskModal = () => {
         const message = selectedId.length === 1 
         ? "Êtes-vous sûr de vouloir supprimer la tâche \u00ab " + tasks.find(t => t.id === selectedId[0])?.name + " \u00bb ?" 
@@ -139,11 +169,11 @@ const TasksPage = () => {
         setDeleteTaskModalParams({isOpen: true, message: message, title: "Suppression de tâches"});
     }
     
-    const onDeleteMessageModalCancelled = () => {
+    const onTasksDeletingCancelled = () => {
         setDeleteTaskModalParams({isOpen: false, message: "", title: ""});
     }
     
-    const onDeleteMessageModalDeleted = () => {
+    const onTasksDeleted = () => {
         setDeleteTaskModalParams({isOpen: false, message: "", title: ""});
         if (selectedId.length === 0)
             return;
@@ -202,11 +232,25 @@ const TasksPage = () => {
                     <div className={"contentMainPanel_header_badge"}>
                         <span>{tasks?.length ?? 0}</span>
                     </div>
-                    <button className={"contentMainPanel_header_button editButton"} onClick={onOpenCategoryEdition}>
-                        <FontAwesomeIcon icon={faPen}/>
-                    </button>
-                    <button className={"contentMainPanel_header_button trashButton" + (selectedId.length === 0 ? " hideButton" : "")} onClick={onOpenDeleteTaskModal}>
-                        <FontAwesomeIcon icon={faTrashCan} />
+                    {
+                        category !== null &&
+                        <button title={"Supprimer la catégorie"} className={"contentMainPanel_header_button trashButton"}
+                                onClick={onOpenDeleteCategoryModal}>
+                            <FontAwesomeIcon icon={faDeleteLeft}/>
+                        </button>
+                    }
+                    {
+                        category !== null &&
+                        <button title={"Modifier la catégorie"} className={"contentMainPanel_header_button editButton"}
+                                onClick={onOpenCategoryEdition}>
+                            <FontAwesomeIcon icon={faPen}/>
+                        </button>
+                        
+                    }
+                    <button title={"Supprimer les tâches sélectionnées"}
+                        className={"contentMainPanel_header_button trashButton" + (selectedId.length === 0 ? " hideButton" : "")}
+                        onClick={onOpenDeleteTaskModal}>
+                        <FontAwesomeIcon icon={faTrashCan}/>
                     </button>
                 </div>
                 <div className={"contentMainPanel_content"}>
@@ -233,9 +277,10 @@ const TasksPage = () => {
             <EditTaskSidebarComponent isEdit={editTaskModalModel.id !== 0} isOpen={isEditTaskSidebarOpen}
                                       onCancelled={onTaskEditionCancelled} onTaskSaved={onTaskSaved}
                                       onTaskDeleted={onTaskDeleted} taskModel={editTaskModalModel}/>
-            <DeleteMessageModalComponent isOpen={deleteTaskModalParams.isOpen} onCancelled={onDeleteMessageModalCancelled} onDeleted={onDeleteMessageModalDeleted} message={deleteTaskModalParams.message} title={deleteTaskModalParams.title} id={"deleteTaskModal"}/>
+            <DeleteMessageModalComponent isOpen={deleteTaskModalParams.isOpen} onCancelled={onTasksDeletingCancelled} onDeleted={onTasksDeleted} message={deleteTaskModalParams.message} title={deleteTaskModalParams.title} id={"deleteTaskModal"}/>
+            <DeleteMessageModalComponent isOpen={deleteCategoryModalParams.isOpen} onCancelled={onCategoryDeletingCancelled} onDeleted={onCategoryDeleted} message={deleteCategoryModalParams.message} title={deleteCategoryModalParams.title} id={"deleteCategoryModal"}/>
             {
-                categoryId !== 0 && category !== null &&
+                category !== null &&
                 <EditCategoryModalComponent isOpen={isCategoryEditionModalOpen} onCancelled={onCategoryEditionCancelled} onCategorySaved={onCategorySaved} model={category} isEdit={true} id={"categoryEditionModal2"}/>
             }
         </section>

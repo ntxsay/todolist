@@ -104,3 +104,16 @@ exports.updateCategory = (req, res, next) => {
         res.status(500).json(err);
     });
 }
+
+exports.deleteCategory = (req, res, next) => {
+    const id = req.params.id;
+    Category.destroy({
+        where: {id: id}
+    }).then(result => {
+        console.log(`La catégorie a été supprimée avec l'id ${req.params.id}.`);
+        res.status(200).json(result);
+    }).catch(err => {
+        console.error('Erreur lors de la suppression:', err);
+        res.status(500).json(err);
+    });
+};
