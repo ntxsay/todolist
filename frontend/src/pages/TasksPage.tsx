@@ -46,8 +46,21 @@ const TasksPage = () => {
     const [isEditTaskSidebarOpen, setIsEditTaskSidebarOpen] = useState(false);
     const [deleteTaskModalParams, setDeleteTaskModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
     const [isCategoryEditionModalOpen, setIsCategoryEditionModalOpen] = useState(false);
+    
+    
     useEffect(() => {
-        if (path.includes("/tasks/category/") && id !== "") {
+        if (path === "/"){
+            console.log("path");
+            axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/today")
+                .then((response) => {
+                    setTasks(response.data);
+                    setHeaderTitle("Aujourd'hui");
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+        else if (path.includes("/tasks/category/") && id !== "") {
 
             axios.get<ICategorySchema>(import.meta.env.VITE_API_URL + "/api/categories/" + id)
                 .then((response) => {
@@ -62,8 +75,6 @@ const TasksPage = () => {
         }
         else {
             const status = searchParams.get('status');
-            console.log('status');
-            console.log(status);
             axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/" + status)
                 .then((response) => {
                     
@@ -87,7 +98,7 @@ const TasksPage = () => {
                     console.error(error);
                 });
         }
-    }, [id, searchParams]);
+    }, [id, path , searchParams]);
 
     const onOpenCreateTaskSidebar = () => {
         setEditTaskModalModel(emptyTask);
@@ -189,7 +200,7 @@ const TasksPage = () => {
                 <div className={"contentMainPanel_header"}>
                     <h3 className={"contentMainPanel_header_title"}>{headerTitle}</h3>
                     <div className={"contentMainPanel_header_badge"}>
-                        <span>{tasks.length}</span>
+                        <span>{tasks?.length ?? 0}</span>
                     </div>
                     <button className={"contentMainPanel_header_button editButton"} onClick={onOpenCategoryEdition}>
                         <FontAwesomeIcon icon={faPen}/>

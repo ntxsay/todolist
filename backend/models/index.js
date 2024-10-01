@@ -15,8 +15,7 @@ Task.belongsTo(Category,
     });
 
 
-
-Category.sync({ force: false })
+/*Category.sync({ force: false })
     .then(() => {
         console.log('La synchronisation des catégories a été effectuée.');
         return Category.findOrCreate({
@@ -37,7 +36,7 @@ Task.sync({ force: false })
     .then(() => {
         console.log('La synchronisation des tâches a été effectuée.');
     })
-    .catch(error => console.error(error));
+    .catch(error => console.error(error));*/
 
 
 

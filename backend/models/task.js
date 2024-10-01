@@ -21,7 +21,6 @@ const Task = database.define(
         beginDate: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW,
         },
         endDate: {
             type: DataTypes.DATE,

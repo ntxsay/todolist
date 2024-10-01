@@ -1,10 +1,11 @@
-﻿import {ICategorySchemaWithCountTasks, ITaskSchema} from "../interfaces/ICategorySchema.tsx";
+﻿import {ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {
     faXmark
 } from '@fortawesome/free-solid-svg-icons'
+import {ITaskSchema} from "../interfaces/ITaskSchema.tsx";
 
 interface EditTaskSidebarComponentProps {
     isOpen: boolean;
@@ -22,7 +23,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
 
     const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
-    
+
     useEffect(() => {
         axios.get<ICategorySchemaWithCountTasks[]>(`${import.meta.env.VITE_API_URL}/api/categories`)
             .then(response => {
@@ -31,59 +32,66 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
             .catch(error => {
                 console.error(error);
             });
-        
+
     }, []);
-    
+
     useEffect(() => {
-        setTask(props.taskModel);
-        //setTask({...props.taskModel, beginDate: new Date(props.taskModel.beginDate).toISOString().slice(0, 16), endDate: new Date(props.taskModel.endDate).toISOString().slice(0, 16)});
+        const beginDate = new Date(props.taskModel.beginDate);
+        const endDate = new Date(props.taskModel.endDate);
+
+        if (!isNaN(beginDate.getTime()) && !isNaN(endDate.getTime())) {
+            console.log(beginDate);
+            setTask({...props.taskModel, beginDate: beginDate.toISOString().slice(0, 16), endDate: endDate.toISOString().slice(0, 16)});
+        } else {
+            setTask(props.taskModel);
+        }
     }, [props.taskModel]);
 
-    
+
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+
         if (task.name === null || task.name === "") {
             setErrorMessage("Le nom de la tâche ne peut pas être vide");
             return;
         }
 
         const regex = /^\s*$/;
-        if ( regex.test(task.name) ) {
+        if (regex.test(task.name)) {
             setErrorMessage("Le nom de la tâche ne peut pas contenir que des espaces blancs");
             return;
         }
-        
+
         if (task.description !== undefined && regex.test(task.description)) {
             setErrorMessage("La description ne peut pas contenir que des espaces blancs");
             return;
         }
-        
+
         if (task.beginDate === null || task.beginDate === "") {
             setErrorMessage("La date de début ne peut pas être vide");
             return;
         }
-        
+
         if (task.endDate === null || task.endDate === "") {
             setErrorMessage("La date de fin ne peut pas être vide");
             return;
         }
-        
+
         if (task.beginDate > task.endDate) {
             setErrorMessage("La date de début doit être inférieure à la date de fin");
             return;
         }
-        
+
         if (task.beginDate === task.endDate) {
             setErrorMessage("La date de début et la date de fin ne peuvent pas être identiques");
             return;
         }
-        
+
         if (task.categoryId === 0) {
             setErrorMessage("Vous devez sélectionner une catégorie");
             return;
         }
-        
+
         if (task.id <= 0) {
             axios.post(import.meta.env.VITE_API_URL + "/api/tasks", task)
                 .then((response) => {
@@ -97,8 +105,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     console.error(error);
                     setErrorMessage(error.response.data.message);
                 });
-        }
-        else {
+        } else {
             axios.put(import.meta.env.VITE_API_URL + "/api/tasks/" + task.id, task)
                 .then((response) => {
                     if (response.status === 200) {
@@ -112,19 +119,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     setErrorMessage(error.response.data.message);
                 });
         }
-        
-    }
-    
-    const onDelete = () => {
-        axios.delete(import.meta.env.VITE_API_URL + `/api/tasks/${task.id}`)
-        .then((response) => {
-            if (response.status === 200) {
-                props.onTaskDeleted(task);
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+
     }
 
     return (
@@ -140,8 +135,8 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     <div className={"taskFormEditor_item taskFormEditor__name"}>
                         <label htmlFor={"taskName"}>Nom de la tâche</label>
                         <textarea wrap={"soft"} name={"taskName"} id={"taskName"} value={task.name}
-                               placeholder={"Entrez le nom de la tâche"}
-                               onChange={(e) => setTask({...task, name: e.target.value})} required/>
+                                  placeholder={"Entrez le nom de la tâche"}
+                                  onChange={(e) => setTask({...task, name: e.target.value})} required/>
                     </div>
                     <div className={"taskFormEditor_item taskFormEditor__description"}>
                         <label htmlFor={"taskDescription"}>Description</label>
@@ -156,7 +151,8 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                             <option value={0}>Sélectionner une catégorie</option>
                             {
                                 categories.map((category) => (
-                                    <option key={category.category.id} value={category.category.id}>{category.category.name}</option>
+                                    <option key={category.category.id}
+                                            value={category.category.id}>{category.category.name}</option>
                                 ))
                             }
                         </select>
@@ -182,12 +178,9 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                     <button type={"submit"} className={"taskFormEditor__buttonBar_saveButton"}>
                         <span>Enregistrer</span>
                     </button>
-                    {
-                        props.isEdit &&
-                        <button onClick={onDelete} className={"taskFormEditor__buttonBar_deleteButton"}>
-                            <span>Supprimer</span>
-                        </button>
-                    }
+                    <button onClick={props.onCancelled} className={"taskFormEditor__buttonBar_deleteButton"}>
+                        <span>Annuler</span>
+                    </button>
                 </div>
             </form>
         </aside>
