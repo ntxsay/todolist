@@ -178,15 +178,21 @@ const TasksPage = () => {
             return;
         
         const statusTaskName = findStatusTaskName(task);
-        if (statusTaskName === null)
+        if (statusTaskName !== null) {
+            const status = statusTasks.find(statusTask => statusTask.name === statusTaskName);
+            if (status) {
+                status.countTasks++;
+                setStatusTasks([...statusTasks]);
+
+            }
+        }
+        
+        const categoryOnSidebar = categories.find(c => c.category.id === task.categoryId);
+        if (categoryOnSidebar === undefined)
             return;
         
-        const status = statusTasks.find(statusTask => statusTask.name === statusTaskName);
-        if (!status)
-            return;
-        
-        status.countTasks++;
-        setStatusTasks([...statusTasks]);
+        categoryOnSidebar.countTasks++;
+        setCategories([...categories]);
     }
 
     const onTaskEditionCancelled = () => {
