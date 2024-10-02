@@ -2,10 +2,9 @@
 const taskController = require('../controllers/taskController');
 const router = express.Router();
 
-router.get('/coming', taskController.getComingTasks);
-router.get('/past', taskController.getPastTasks);
-router.get('/today', taskController.getTodayTasks);
-router.get('/status', taskController.countStatusTasks);
+router.get('/count-status', taskController.countStatusTasks);
+router.get('/status', taskController.findTasksByStatus);
+router.get('/search', taskController.findTasks);
 router.get('/', taskController.getAllTasks);
 router.get('/:id', taskController.getTaskById);
 router.get('/category/:id', taskController.getTasksByCategoryId);

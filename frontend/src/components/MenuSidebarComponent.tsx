@@ -9,7 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import React, {useState} from "react";
 import {ICategorySchema, ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {IStatusSchema} from "../interfaces/IStatusSchema.tsx";
 import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
 import EditCategoryModalComponent from "./EditCategoryModalComponent.tsx";
@@ -31,16 +31,22 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
         updatedAt: "",
         Tasks: []
     };
-    
+    const navigate = useNavigate();
     const [isEditCategoryModalOpen, setIsEditCategoryModalOpen] = useState(false);
     const [editCategoryModalModel, setEditCategoryModalModel] = useState<ICategorySchema>(emptyCategory);
-    
+    const [taskQuery, setTaskQuery] = useState<string>("");
     const iconDictionary : { [key: string]: IconDefinition } = {
         "coming": faAnglesRight,
         "today": faCalendarDay,
         "past": faCalendarCheck
     };
     
+    const onFindTasksSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (taskQuery === "")
+            return;
+        navigate(`/tasks?search=${taskQuery}`);
+    }
     
     const onOpenCreateCategoryModal = () => {
         setEditCategoryModalModel(emptyCategory);
@@ -69,12 +75,12 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                     <FontAwesomeIcon icon={faBars}/>
                 </button>
             </div>
-            <form className={"leftMainPanel_searchFormContainer"}>
+            <form className={"leftMainPanel_searchFormContainer"} onSubmit={onFindTasksSubmit}>
                 <button type={"submit"}>
                     <FontAwesomeIcon icon={faMagnifyingGlass}/>
                 </button>
                 <label htmlFor={"searchInput"}>Search</label>
-                <input type={"text"} placeholder={"Search"} name={"searchInput"} id={"searchInput"}/>
+                <input type={"text"} placeholder={"Search"} name={"searchInput"} id={"searchInput"} onChange={(e) => setTaskQuery(e.target.value)}/>
             </form>
             <div className={"leftMainPanel_navigationContainer"}>
                 <article id={"tasksContainer"} className={"leftMainPanel_navigationContainer_navigationItemSection"}>

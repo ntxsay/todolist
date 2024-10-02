@@ -29,7 +29,7 @@ const Layout = () => {
 
     const fetchStatusTasks = async () => {
         try {
-            const response = await axios.get<IStatusSchema[]>(`${import.meta.env.VITE_API_URL}/api/tasks/status`);
+            const response = await axios.get<IStatusSchema[]>(`${import.meta.env.VITE_API_URL}/api/tasks/count-status`);
             setStatusTasks(response.data)
         } catch (error) {
             console.error(error);

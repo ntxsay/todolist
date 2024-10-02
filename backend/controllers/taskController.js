@@ -23,39 +23,54 @@ exports.getTasksByCategoryId = (req, res, next) => {
         .catch(error => res.status(500).json(error));
 };
 
-exports.getComingTasks = (req, res, next) => {
-    Task.findAll({
-        where: {
-            beginDate: {
-                [Op.gt]: new Date()
-            }
-        }
-    })
-        .then(tasks => res.status(200).json(tasks))
-        .catch(error => res.status(500).json(error));
+exports.findTasksByStatus = async (req, res, next) => {
+    const status = req.query.status;
+    console.log('status')
+    console.log(status);
+    switch (status) {
+        case "today":
+            Task.findAll({
+                where: {
+                    beginDate: {
+                        [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)),
+                        [Op.lt]: new Date(new Date().setHours(23, 59, 59, 999))
+                    }
+                }
+            }).then(tasks => res.status(200).json(tasks))
+                .catch(error => res.status(500).json(error));
+            break;
+        case "past":
+            Task.findAll({
+                where: {
+                    endDate: {
+                        [Op.lt]: new Date()
+                    }
+                }
+            }).then(tasks => res.status(200).json(tasks))
+                .catch(error => res.status(500).json(error));
+            break;
+        case "coming":
+            Task.findAll({
+                where: {
+                    beginDate: {
+                        [Op.gt]: new Date()
+                    }
+                }
+            }).then(tasks => res.status(200).json(tasks))
+                .catch(error => res.status(500).json(error));
+            break;
+        default:
+            res.status(400).json({message: "Le statut n'existe pas"});
+            break;
+    }
 };
 
-exports.getPastTasks = (req, res, next) => {
+exports.findTasks = async (req, res, next) => {
+    const query = req.query.query;
     Task.findAll({
         where: {
-            endDate: {
-                [Op.lt]: new Date()
-            }
-        }
-    })
-        .then(tasks => res.status(200).json(tasks))
-        .catch(error => res.status(500).json(error));
-};
-
-exports.getTodayTasks = (req, res, next) => {
-    const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
-    const endOfDay = new Date(new Date().setHours(23, 59, 59, 999)); 
-
-    Task.findAll({
-        where: {
-            beginDate: {
-                [Op.gte]: startOfDay,
-                [Op.lt]: endOfDay
+            name: {
+                [Op.like]: `%${query}%`
             }
         }
     })

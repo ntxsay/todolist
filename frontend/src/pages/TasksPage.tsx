@@ -42,6 +42,7 @@ const TasksPage = () => {
     const {id} = useParams<{ id: string }>();
     const [searchParams] = useSearchParams();
     const status = searchParams.get('status');
+    const search = searchParams.get('search');
 
     const [headerTitle, setHeaderTitle] = useState<string>("");
     const [selectedId, setSelectedId] = useState<number[]>([]);
@@ -63,6 +64,7 @@ const TasksPage = () => {
     }>();
     
     useEffect(() => {
+        
         if (path.includes("/tasks/category/") && id !== "") {
 
             axios.get<ICategorySchema>(import.meta.env.VITE_API_URL + "/api/categories/" + id)
@@ -78,8 +80,22 @@ const TasksPage = () => {
             return;
         }
         
-        if (path.includes("/tasks?status=") && status !== null) {
-            axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/" + status)
+        if (search !== null) {
+            axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/search?query=" + search)
+                .then((response) => {
+                    setTasks(response.data);
+                    setHeaderTitle("Recherche");
+                    setCategory(null);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+            
+            return;
+        }
+        
+        if (status !== null) {
+            axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/status?status=" + status)
                 .then((response) => {
 
                     switch (status) {
@@ -222,16 +238,22 @@ const TasksPage = () => {
                         if (task !== undefined)
                         {
                             const statusTaskName = findStatusTaskName(task);
-                            if (statusTaskName === null)
-                                return;
-
-                            const status = statusTasks.find(statusTask => statusTask.name === statusTaskName);
-                            if (!status || status.countTasks === 0)
-                                return;
+                            if (statusTaskName !== null){
+                                const status = statusTasks.find(statusTask => statusTask.name === statusTaskName);
+                                if (status && status.countTasks > 0)
+                                {
+                                    status.countTasks--;
+                                    setStatusTasks([...statusTasks]);
+                                }
+                            }
                             
-                            status.countTasks--;
-                            setStatusTasks([...statusTasks]);
+                            const categoryOnSidebar = categories.find(c => c.category.id === task.categoryId);
+                            if (categoryOnSidebar !== undefined){
+                                categoryOnSidebar.countTasks--;
+                                setCategories([...categories]);
+                            }
                         }
+                        
                         
                         setTasks(tasks.filter(t => t.id !== id));
                     }
