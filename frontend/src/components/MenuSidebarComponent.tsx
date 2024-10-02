@@ -7,59 +7,60 @@ import {
     faCalendarCheck,
     faPlus
 } from '@fortawesome/free-solid-svg-icons'
-import axios from 'axios';
-import React, {useState, useEffect} from "react";
+import React, {useState} from "react";
 import {ICategorySchema, ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
 import {Link} from "react-router-dom";
 import {IStatusSchema} from "../interfaces/IStatusSchema.tsx";
 import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
+import EditCategoryModalComponent from "./EditCategoryModalComponent.tsx";
 interface MenuSidebarComponentProps {
-   
-    onCreateCategory: () => void;
-    newCategory: ICategorySchema | null;
+    categories: ICategorySchemaWithCountTasks[];
+    setCategories: (categories: ICategorySchemaWithCountTasks[]) => void;
+    taskStatuses: IStatusSchema[];
+    setStatusTasks: (statusTasks: IStatusSchema[]) => void;
 }
 
 const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
 
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
-    const [statusTasks, setStatusTasks] = useState<IStatusSchema[]>([]);
+    const emptyCategory: ICategorySchema = {
+        id: 0,
+        name: "",
+        color: "",
+        description: undefined,
+        createdAt: "",
+        updatedAt: "",
+        Tasks: []
+    };
+    
+    const [isEditCategoryModalOpen, setIsEditCategoryModalOpen] = useState(false);
+    const [editCategoryModalModel, setEditCategoryModalModel] = useState<ICategorySchema>(emptyCategory);
+    
     const iconDictionary : { [key: string]: IconDefinition } = {
         "coming": faAnglesRight,
         "today": faCalendarDay,
         "past": faCalendarCheck
     };
     
-    useEffect(() => {
-        fetchCategories().then();
-        fetchStatusTasks().then();
-    }, []);
+    
+    const onOpenCreateCategoryModal = () => {
+        setEditCategoryModalModel(emptyCategory);
+        setIsEditCategoryModalOpen(true);
+    }
 
-    useEffect(() => {
-        console.log(props.newCategory);
-        if (props.newCategory !== null && props.newCategory.id !== 0 && props.newCategory.name !== null && props.newCategory.name !== "") {
-            setCategories([...categories, {category: props.newCategory, countTasks: 0}]);
-        }
-    }, [props.newCategory]);
+    const onCategorySaved = (category: ICategorySchema) => {
+        setEditCategoryModalModel(category);
+        props.setCategories([...props.categories, {
+            category: category, 
+            countTasks: 0
+        }]);
+        setIsEditCategoryModalOpen(false);
+    }
 
-    const fetchCategories = async () => {
-        try {
-            const response = await axios.get<ICategorySchemaWithCountTasks[]>(`${apiUrl}/api/categories`);
-            setCategories(response.data)
-        } catch (error) {
-            console.error(error);
-        }
+    const onCategoryEditionCancelled = () => {
+        setEditCategoryModalModel(emptyCategory);
+        setIsEditCategoryModalOpen(false);
     }
     
-    const fetchStatusTasks = async () => {
-        try {
-            const response = await axios.get<IStatusSchema[]>(`${apiUrl}/api/tasks/status`);
-            setStatusTasks(response.data)
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     return (
         <aside id={"leftMainPanel"} >
             <div className={"leftMainPanel_menuContainer"}>
@@ -80,7 +81,7 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                     <h2 className={"navigationItemSection_title"}>Tâches</h2>
                     <ul className={"navigationItemSection_list"}>
                         {
-                            statusTasks.map((statusTask, index) => {
+                            props.taskStatuses.map((statusTask, index) => {
                                 const icon = iconDictionary[statusTask.name];
                                 if (!icon)
                                     return;
@@ -105,7 +106,7 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                     <h2 className={"navigationItemSection_title"}>Catégories</h2>
                     <ul className={"navigationItemSection_list"}>
                         {
-                            categories.map((category) => (
+                            props.categories.map((category) => (
                                 <li className={"navigationItemSection_list_navigationItem"} key={category.category.id}>
                                     <Link to={`/tasks/category/${category.category.id}`}>
                                         <div className={"categoryColor"}
@@ -120,7 +121,7 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                         }
                         <li className={"navigationItemSection_list_navigationItem"}>
                             <button className={"navigationItemSection_list_navigationItem_button"}
-                            onClick={props.onCreateCategory}>
+                            onClick={onOpenCreateCategoryModal}>
                                 <FontAwesomeIcon icon={faPlus} />
                                 <span>Nouvelle catégorie</span>
                             </button>
@@ -128,6 +129,8 @@ const MenuSidebarComponent:React.FC<MenuSidebarComponentProps> = (props) => {
                     </ul>
                 </article>
             </div>
+            <EditCategoryModalComponent isOpen={isEditCategoryModalOpen} onCancelled={onCategoryEditionCancelled} onCategorySaved={onCategorySaved} model={editCategoryModalModel}
+                                        isEdit={editCategoryModalModel.id !== 0} id={"createCategoryModal"}/>
         </aside>
     );
 }

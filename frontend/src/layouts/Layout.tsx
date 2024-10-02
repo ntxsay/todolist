@@ -1,52 +1,47 @@
 ﻿import {Outlet} from 'react-router-dom';
 import MenuSidebarComponent from "../components/MenuSidebarComponent.tsx";
-import EditCategoryModalComponent from "../components/EditCategoryModalComponent.tsx";
-import {useState} from "react";
-import {ICategorySchema} from "../interfaces/ICategorySchema.tsx";
+import {useEffect, useState} from "react";
 import Modal from "react-modal";
+import {IStatusSchema} from "../interfaces/IStatusSchema.tsx";
+import axios from "axios";
+import {ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
 
 Modal.setAppElement('#root');
 
 const Layout = () => {
+    
+    const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
+    const [statusTasks, setStatusTasks] = useState<IStatusSchema[]>([]);
 
-    const emptyCategory: ICategorySchema = {
-        id: 0,
-        name: "",
-        color: "",
-        description: undefined,
-        createdAt: "",
-        updatedAt: "",
-        Tasks: []
-    };
+    useEffect(() => {
+        fetchCategories().then();
+        fetchStatusTasks().then();
+    }, []);
     
-    const [isEditCategoryModalOpen, setIsEditCategoryModalOpen] = useState(false);
-    const [editCategoryModalModel, setEditCategoryModalModel] = useState<ICategorySchema>(emptyCategory);
-    
-    const onOpenCreateCategoryModal = () => {
-        setEditCategoryModalModel(emptyCategory);
-        setIsEditCategoryModalOpen(true);
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get<ICategorySchemaWithCountTasks[]>(`${import.meta.env.VITE_API_URL}/api/categories`);
+            setCategories(response.data)
+        } catch (error) {
+            console.error(error);
+        }
     }
-    
-    const onCategorySaved = (category: ICategorySchema) => {
-        setEditCategoryModalModel(category);
-        setIsEditCategoryModalOpen(false);
+
+    const fetchStatusTasks = async () => {
+        try {
+            const response = await axios.get<IStatusSchema[]>(`${import.meta.env.VITE_API_URL}/api/tasks/status`);
+            setStatusTasks(response.data)
+        } catch (error) {
+            console.error(error);
+        }
     }
-    
-    const onCategoryEditionCancelled = () => {
-        setEditCategoryModalModel(emptyCategory);
-        setIsEditCategoryModalOpen(false);
-    }
-    
-    
+
     return (
-        <>
-            <main>
-                <MenuSidebarComponent onCreateCategory={onOpenCreateCategoryModal} newCategory={editCategoryModalModel}/>
-                <Outlet/>
-            </main>
-            <EditCategoryModalComponent isOpen={isEditCategoryModalOpen} onCancelled={onCategoryEditionCancelled} onCategorySaved={onCategorySaved} model={editCategoryModalModel}
-            isEdit={editCategoryModalModel.id !== 0} id={"categoryEditionModal"}/>
-        </>
+        <main>
+            <MenuSidebarComponent categories={categories} taskStatuses={statusTasks} setCategories={setCategories}
+                                  setStatusTasks={setStatusTasks}/>
+            <Outlet context={{categories, setCategories, statusTasks, setStatusTasks}}/>
+        </main>
     );
 }
 

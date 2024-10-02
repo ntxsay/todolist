@@ -1,6 +1,6 @@
-﻿import {useLocation, useNavigate, useParams, useSearchParams} from "react-router-dom";
+﻿import {useLocation, useNavigate, useOutletContext, useParams, useSearchParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import {ICategorySchema} from "../interfaces/ICategorySchema.tsx";
+import {ICategorySchema, ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
 import axios from "axios";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {
@@ -14,6 +14,7 @@ import EditTaskSidebarComponent from "../components/EditTaskSidebarComponent.tsx
 import DeleteMessageModalComponent from "../components/DeleteMessageModalComponent.tsx";
 import {ITaskSchema} from "../interfaces/ITaskSchema.tsx";
 import EditCategoryModalComponent from "../components/EditCategoryModalComponent.tsx";
+import {IStatusSchema} from "../interfaces/IStatusSchema.tsx";
 
 interface DeleteMessageModalProps {
     isOpen: boolean;
@@ -32,6 +33,9 @@ const TasksPage = () => {
         createdAt: "",
         updatedAt: ""
     };
+    const past = "past";
+    const coming = "coming";
+    const today = "today";
     
     const navigate = useNavigate();
     const location = useLocation();
@@ -50,10 +54,18 @@ const TasksPage = () => {
     const [deleteTaskModalParams, setDeleteTaskModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
     const [deleteCategoryModalParams, setDeleteCategoryModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
     const [isCategoryEditionModalOpen, setIsCategoryEditionModalOpen] = useState(false);
-    
+
+    const { categories, setCategories, statusTasks, setStatusTasks } = useOutletContext<{
+        categories: ICategorySchemaWithCountTasks[];
+        setCategories: (categories: ICategorySchemaWithCountTasks[]) => void;
+        statusTasks: IStatusSchema[];
+        setStatusTasks: (statusTasks: IStatusSchema[]) => void;
+    }>();
     
     useEffect(() => {
-        if (path === "/"){
+        const status = searchParams.get('status');
+
+        if (path === "/" || !status) {
             console.log("path");
             axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/today")
                 .then((response) => {
@@ -64,8 +76,11 @@ const TasksPage = () => {
                 .catch((error) => {
                     console.error(error);
                 });
+            
+            return;
         }
-        else if (path.includes("/tasks/category/") && id !== "") {
+        
+        if (path.includes("/tasks/category/") && id !== "") {
 
             axios.get<ICategorySchema>(import.meta.env.VITE_API_URL + "/api/categories/" + id)
                 .then((response) => {
@@ -76,33 +91,34 @@ const TasksPage = () => {
                 .catch((error) => {
                     console.error(error);
                 });
+            
+            return;
         }
-        else {
-            const status = searchParams.get('status');
-            axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/" + status)
-                .then((response) => {
-                    
-                    switch (status) {
-                        case "today":
-                            setHeaderTitle("Aujourd'hui");
-                            break;
-                        case "past":
-                            setHeaderTitle("Passées");
-                            break;
-                            case "coming":
-                            setHeaderTitle("À venir");
-                            break;
-                        default:
-                            setHeaderTitle("");
-                            break;
-                    }
-                    setTasks(response.data);
-                    setCategory(null);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        }
+
+        axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/" + status)
+            .then((response) => {
+
+                switch (status) {
+                    case today:
+                        setHeaderTitle("Aujourd'hui");
+                        break;
+                    case past:
+                        setHeaderTitle("Passées");
+                        break;
+                    case coming:
+                        setHeaderTitle("À venir");
+                        break;
+                    default:
+                        setHeaderTitle("");
+                        break;
+                }
+                setTasks(response.data);
+                setCategory(null);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        
     }, [id, path, searchParams]);
 
     const onOpenCreateTaskSidebar = () => {
@@ -114,13 +130,37 @@ const TasksPage = () => {
         setEditTaskModalModel(task);
         setIsEditTaskSidebarOpen(true);
     }
+    
+    const findStatusTaskName = (task: ITaskSchema) : string | null => {
+        const dateNow = new Date();
+        const dateBegin = new Date(task.beginDate);
+        const dateEnd = new Date(task.endDate);
+        
+        if (isNaN(dateBegin.getTime()) || isNaN(dateEnd.getTime()))
+            return null;
+        
+        if (dateEnd < dateNow)
+            return past;
+        
+        if (dateBegin > dateNow)
+            return coming;
+        
+        if (dateBegin >= new Date(new Date().setHours(0, 0, 0, 0)) && dateBegin <= new Date(new Date().setHours(23, 59, 59, 999)))
+            return today;
+        
+        return null;
+    }
+            
+            
 
     const onTaskSaved = (task: ITaskSchema) => {
         setEditTaskModalModel(task);
         setIsEditTaskSidebarOpen(false);
 
         const existingTask = tasks.find(t => t.id === task.id);
-        if (existingTask === undefined) {
+        const isNewTask = existingTask === undefined;
+        
+        if (isNewTask) {
             if (category !== null && category.id === task.categoryId)
                 setTasks([...tasks, task]);
         } else {
@@ -129,6 +169,20 @@ const TasksPage = () => {
             existingTask.endDate = task.endDate;
             existingTask.description = task.description;
         }
+        
+        if (!isNewTask)
+            return;
+        
+        const statusTaskName = findStatusTaskName(task);
+        if (statusTaskName === null)
+            return;
+        
+        const status = statusTasks.find(statusTask => statusTask.name === statusTaskName);
+        if (!status)
+            return;
+        
+        status.countTasks++;
+        setStatusTasks([...statusTasks]);
     }
 
     const onTaskEditionCancelled = () => {
@@ -157,9 +211,23 @@ const TasksPage = () => {
             axios.delete(import.meta.env.VITE_API_URL + `/api/tasks/${id}`)
                 .then((response) => {
                     if (response.status === 200) {
-                        console.log(`La tâche a été supprimée avec l'id ${id}`);
-                        setTasks(tasks.filter(t => t.id !== id));
                         setSelectedId(selectedId.filter(i => i !== id));
+                        const task = tasks.find(t => t.id === id);
+                        if (task !== undefined)
+                        {
+                            const statusTaskName = findStatusTaskName(task);
+                            if (statusTaskName === null)
+                                return;
+
+                            const status = statusTasks.find(statusTask => statusTask.name === statusTaskName);
+                            if (!status || status.countTasks === 0)
+                                return;
+                            
+                            status.countTasks--;
+                            setStatusTasks([...statusTasks]);
+                        }
+                        
+                        setTasks(tasks.filter(t => t.id !== id));
                     }
                 })
                 .catch((error) => {
