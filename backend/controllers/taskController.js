@@ -65,7 +65,6 @@ exports.getTodayTasks = (req, res, next) => {
 
 exports.countStatusTasks = async (req, res, next) => {
     try {
-        console.log('uu');
         const countComingTasks = await Task.count({
             where: {
                 beginDate: {
@@ -132,8 +131,8 @@ exports.updateTask = (req, res, next) => {
         },
         { where: { id: id } }
     ).then(result => {
-        console.log(`La tâche a été nommée "${task.name}" avec l'id ${req.params.id} a été mise à jour.`);
-        res.status(200).json(result);
+        console.log(`La tâche a été nommée "${task.name}" avec l'id ${id} a été mise à jour.`);
+        res.status(200).json(task);
     }).catch(err => {
         console.error('Erreur lors de la mise à jour:', err);
         res.status(500).json(err);
@@ -146,7 +145,7 @@ exports.deleteTask = (req, res, next) => {
     Task.destroy({
         where: {id: id}
     }).then(result => {
-        console.log(`La tâche a été supprimée avec l'id ${req.params.id}.`);
+        console.log(`La tâche a été supprimée avec l'id ${id}.`);
         res.status(200).json(result);
     }).catch(err => {
         console.error('Erreur lors de la suppression:', err);

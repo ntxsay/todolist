@@ -1,4 +1,4 @@
-﻿import {ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
+﻿import {ICategorySchema} from "../interfaces/ICategorySchema.tsx";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
@@ -13,26 +13,13 @@ interface EditTaskSidebarComponentProps {
     onCancelled: () => void;
     onTaskSaved: (task: ITaskSchema) => void;
     taskModel: ITaskSchema;
+    categories: ICategorySchema[]
 }
 
 const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props) => {
 
-    console.log(props)
     const [task, setTask] = useState<ITaskSchema>(props.taskModel);
-
-    const [categories, setCategories] = useState<ICategorySchemaWithCountTasks[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
-
-    useEffect(() => {
-        axios.get<ICategorySchemaWithCountTasks[]>(`${import.meta.env.VITE_API_URL}/api/categories`)
-            .then(response => {
-                setCategories(response.data)
-            })
-            .catch(error => {
-                console.error(error);
-            });
-
-    }, []);
 
     useEffect(() => {
         const beginDate = new Date(props.taskModel.beginDate);
@@ -50,18 +37,21 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (task.name === null || task.name === "") {
+        const name = task.name.trim();
+
+        if (name === null || name === "") {
             setErrorMessage("Le nom de la tâche ne peut pas être vide");
             return;
         }
 
-        const regex = /^\s*$/;
-        if (regex.test(task.name)) {
+        const regexName = /^\s*$/;
+        if (regexName.test(task.name)) {
             setErrorMessage("Le nom de la tâche ne peut pas contenir que des espaces blancs");
             return;
         }
 
-        if (task.description !== undefined && regex.test(task.description)) {
+        const regexDescription = /^\s+$/;
+        if (task.description !== undefined && regexDescription.test(task.description)) {
             setErrorMessage("La description ne peut pas contenir que des espaces blancs");
             return;
         }
@@ -90,6 +80,8 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
             setErrorMessage("Vous devez sélectionner une catégorie");
             return;
         }
+        
+        setTask({...task, name: name});
 
         if (task.id <= 0) {
             axios.post(import.meta.env.VITE_API_URL + "/api/tasks", task)
@@ -108,7 +100,7 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
             axios.put(import.meta.env.VITE_API_URL + "/api/tasks/" + task.id, task)
                 .then((response) => {
                     if (response.status === 200) {
-                        props.onTaskSaved(task);
+                        props.onTaskSaved(response.data);
                         setTask(props.taskModel);
                         setErrorMessage("");
                     }
@@ -149,9 +141,9 @@ const EditTaskSidebarComponent: React.FC<EditTaskSidebarComponentProps> = (props
                                 onChange={(e) => setTask({...task, categoryId: Number(e.target.value)})}>
                             <option value={0}>Sélectionner une catégorie</option>
                             {
-                                categories.map((category) => (
-                                    <option key={category.category.id}
-                                            value={category.category.id}>{category.category.name}</option>
+                                props.categories.map((category) => (
+                                    <option key={category.id}
+                                            value={category.id}>{category.name}</option>
                                 ))
                             }
                         </select>

@@ -1,4 +1,4 @@
-﻿import {useLocation, useNavigate, useOutletContext, useParams, useSearchParams} from "react-router-dom";
+﻿import {useLocation, useOutletContext, useParams, useSearchParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import {ICategorySchema, ICategorySchemaWithCountTasks} from "../interfaces/ICategorySchema.tsx";
 import axios from "axios";
@@ -37,11 +37,11 @@ const TasksPage = () => {
     const coming = "coming";
     const today = "today";
     
-    const navigate = useNavigate();
     const location = useLocation();
     const path: string = location.pathname;
     const {id} = useParams<{ id: string }>();
     const [searchParams] = useSearchParams();
+    const status = searchParams.get('status');
 
     const [headerTitle, setHeaderTitle] = useState<string>("");
     const [selectedId, setSelectedId] = useState<number[]>([]);
@@ -63,23 +63,6 @@ const TasksPage = () => {
     }>();
     
     useEffect(() => {
-        const status = searchParams.get('status');
-
-        if (path === "/" || !status) {
-            console.log("path");
-            axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/today")
-                .then((response) => {
-                    setTasks(response.data);
-                    setHeaderTitle("Aujourd'hui");
-                    setCategory(null);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-            
-            return;
-        }
-        
         if (path.includes("/tasks/category/") && id !== "") {
 
             axios.get<ICategorySchema>(import.meta.env.VITE_API_URL + "/api/categories/" + id)
@@ -94,25 +77,39 @@ const TasksPage = () => {
             
             return;
         }
+        
+        if (path.includes("/tasks?status=") && status !== null) {
+            axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/" + status)
+                .then((response) => {
 
-        axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/" + status)
+                    switch (status) {
+                        case today:
+                            setHeaderTitle("Aujourd'hui");
+                            break;
+                        case past:
+                            setHeaderTitle("Passées");
+                            break;
+                        case coming:
+                            setHeaderTitle("À venir");
+                            break;
+                        default:
+                            setHeaderTitle("");
+                            break;
+                    }
+                    setTasks(response.data);
+                    setCategory(null);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+            
+            return;
+        }
+
+        axios.get<ITaskSchema[]>(import.meta.env.VITE_API_URL + "/api/tasks/today")
             .then((response) => {
-
-                switch (status) {
-                    case today:
-                        setHeaderTitle("Aujourd'hui");
-                        break;
-                    case past:
-                        setHeaderTitle("Passées");
-                        break;
-                    case coming:
-                        setHeaderTitle("À venir");
-                        break;
-                    default:
-                        setHeaderTitle("");
-                        break;
-                }
                 setTasks(response.data);
+                setHeaderTitle("Aujourd'hui");
                 setCategory(null);
             })
             .catch((error) => {
@@ -155,7 +152,6 @@ const TasksPage = () => {
         setEditTaskModalModel(task);
         setIsEditTaskSidebarOpen(true);
     }
-    
     
     const onTaskSaved = (task: ITaskSchema) => {
         setEditTaskModalModel(task);
@@ -286,7 +282,8 @@ const TasksPage = () => {
         axios.delete(import.meta.env.VITE_API_URL + `/api/categories/${category.id}`)
             .then((response) => {
                 if (response.status === 200) {
-                    navigate("/");
+                    setCategories(categories.filter(c => c.category.id !== category.id));
+                    window.location.assign("/");
                 }
             })
             .catch((error) => {
@@ -350,6 +347,7 @@ const TasksPage = () => {
             </div>
             <EditTaskSidebarComponent isEdit={editTaskModalModel.id !== 0} isOpen={isEditTaskSidebarOpen}
                                       onCancelled={onTaskEditionCancelled} onTaskSaved={onTaskSaved}
+                                      categories={categories.map(c => c.category)}
                                       taskModel={editTaskModalModel}/>
             <DeleteMessageModalComponent isOpen={deleteTaskModalParams.isOpen} onCancelled={onTasksDeletingCancelled} onDeleted={onTasksDeleted} message={deleteTaskModalParams.message} title={deleteTaskModalParams.title} id={"deleteTaskModal"}/>
             <DeleteMessageModalComponent isOpen={deleteCategoryModalParams.isOpen} onCancelled={onCategoryDeletingCancelled} onDeleted={onCategoryDeleted} message={deleteCategoryModalParams.message} title={deleteCategoryModalParams.title} id={"deleteCategoryModal"}/>

@@ -90,8 +90,9 @@ exports.updateCategory = (req, res, next) => {
         },
         {where: {id: id}}
     ).then(result => {
-        console.log(`La catégorie a été mise à jour avec l'id ${req.params.id} a été mise à jour.`);
-        res.status(200).json(result);
+        console.log(result);
+        console.log(`La catégorie a été mise à jour avec l'id ${id} a été mise à jour.`);
+        res.status(200).json(category);
     }).catch(err => {
         if (err.errors.length > 0) {
             if (err.errors[0].type === "unique violation" && err.errors[0].path === "color") {

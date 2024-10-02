@@ -22,21 +22,25 @@ const EditCategoryModalComponent: React.FC<EditCategoryModalProps> = (props) => 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (category.name === null || category.name === "") {
+        const name = category.name.trim();
+        if (name === null || name === "") {
             setMessageError("Le nom de la catégorie est obligatoire");
             return;
         }
 
-        const regex = /^\s*$/;
-        if (regex.test(category.name)) {
+        const regexName = /^\s*$/;
+        if (regexName.test(name)) {
             setMessageError("Le nom de la catégorie ne peut pas contenir que des espaces blancs");
             return;
         }
 
-        if (category.description !== undefined && regex.test(category.description)) {
+        const regexDescription = /^\s+$/;
+        if (category.description !== undefined && regexDescription.test(category.description)) {
             setMessageError("La description ne peut pas contenir que des espaces blancs");
             return;
         }
+        
+        setCategory({...category, name: name});
 
         if (props.isEdit) {
             axios.put(import.meta.env.VITE_API_URL + "/api/categories/" + props.model.id, category)
@@ -63,7 +67,6 @@ const EditCategoryModalComponent: React.FC<EditCategoryModalProps> = (props) => 
                 .catch((error) => {
                     console.error(error);
                     setMessageError(error.response.data.message);
-                    setCategory(props.model);
                 });
         }
     }
@@ -104,17 +107,15 @@ const EditCategoryModalComponent: React.FC<EditCategoryModalProps> = (props) => 
                         <input type="color" name="color" id="color" value={category.color}
                                onChange={(e) => setCategory({...category, color: e.target.value})} required/>
                     </div>
-                    <div className={"CategoryEditionModal__form_validation" + (messageError === "" ? "" : " --hasErrors")}>
-                        <p>{messageError}</p>
-                    </div>
-                    <div className="CategoryEditionModal__footer">
-                        <button type="submit" className={"saveButton"}>
-                            <span>Sauvegarder</span>
-                        </button>
-                        <button onClick={onCancel} className={"cancelButton"}>
-                            <span>Annuler</span>
-                        </button>
-                    </div>
+                    <p className={"CategoryEditionModal__form_validation" + (messageError === "" ? "" : " --hasErrors")}>{messageError}</p>
+                </div>
+                <div className="CategoryEditionModal__footer">
+                    <button type="submit" className={"saveButton"}>
+                    <span>Sauvegarder</span>
+                    </button>
+                    <button onClick={onCancel} className={"cancelButton"}>
+                        <span>Annuler</span>
+                    </button>
                 </div>
             </form>
         </Modal>
