@@ -12,7 +12,6 @@ interface EditTaskSidebarComponentProps {
     isEdit: boolean;
     onCancelled: () => void;
     onTaskSaved: (task: ITaskSchema) => void;
-    onTaskDeleted: (task: ITaskSchema) => void;
     taskModel: ITaskSchema;
 }
 

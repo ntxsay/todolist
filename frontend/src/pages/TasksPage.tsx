@@ -121,6 +121,31 @@ const TasksPage = () => {
         
     }, [id, path, searchParams]);
 
+    const findStatusTaskName = (task: ITaskSchema) : string | null => {
+        const dateNow = new Date();
+        const dateBegin = new Date(task.beginDate);
+        const dateEnd = new Date(task.endDate);
+
+        if (isNaN(dateBegin.getTime()) || isNaN(dateEnd.getTime()))
+            return null;
+
+        if (dateEnd < dateNow)
+            return past;
+
+        if (dateBegin > dateNow)
+            return coming;
+
+        if (dateBegin >= new Date(new Date().setHours(0, 0, 0, 0)) && dateBegin <= new Date(new Date().setHours(23, 59, 59, 999)))
+            return today;
+
+        return null;
+    }
+
+    const onTaskCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>, taskId: number) => {
+        setSelectedId(e.target.checked
+            ? [...selectedId, taskId]
+            : selectedId.filter(id => id !== taskId));
+    }
     const onOpenCreateTaskSidebar = () => {
         setEditTaskModalModel(emptyTask);
         setIsEditTaskSidebarOpen(true);
@@ -131,28 +156,7 @@ const TasksPage = () => {
         setIsEditTaskSidebarOpen(true);
     }
     
-    const findStatusTaskName = (task: ITaskSchema) : string | null => {
-        const dateNow = new Date();
-        const dateBegin = new Date(task.beginDate);
-        const dateEnd = new Date(task.endDate);
-        
-        if (isNaN(dateBegin.getTime()) || isNaN(dateEnd.getTime()))
-            return null;
-        
-        if (dateEnd < dateNow)
-            return past;
-        
-        if (dateBegin > dateNow)
-            return coming;
-        
-        if (dateBegin >= new Date(new Date().setHours(0, 0, 0, 0)) && dateBegin <= new Date(new Date().setHours(23, 59, 59, 999)))
-            return today;
-        
-        return null;
-    }
-            
-            
-
+    
     const onTaskSaved = (task: ITaskSchema) => {
         setEditTaskModalModel(task);
         setIsEditTaskSidebarOpen(false);
@@ -237,21 +241,6 @@ const TasksPage = () => {
         
         setSelectedId([]);
     }
-    
-    const onTaskCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>, taskId: number) => {
-        setSelectedId(e.target.checked
-            ? [...selectedId, taskId]
-            : selectedId.filter(id => id !== taskId));
-    }
-
-    const onTaskDeleted = (task: ITaskSchema) => {
-        setEditTaskModalModel(emptyTask);
-        setIsEditTaskSidebarOpen(false);
-
-        if (category === null)
-            return;
-        setCategory({...category, Tasks: [...category.Tasks.filter(t => t.id !== task.id)]});
-    }
 
     const onOpenCategoryEdition = () => {
         setIsCategoryEditionModalOpen(true);
@@ -261,6 +250,15 @@ const TasksPage = () => {
         setCategory(category);
         setIsCategoryEditionModalOpen(false);
         setHeaderTitle(category.name);
+        
+        const categoryOnSidebar = categories.find(c => c.category.id === category.id);
+        if (categoryOnSidebar === undefined)
+            return;
+        
+        categoryOnSidebar.category.name = category.name;
+        categoryOnSidebar.category.description = category.description;
+        categoryOnSidebar.countTasks = tasks.length;
+        setCategories([...categories]);
     }
     
     const onCategoryEditionCancelled = () => {
@@ -346,7 +344,7 @@ const TasksPage = () => {
             </div>
             <EditTaskSidebarComponent isEdit={editTaskModalModel.id !== 0} isOpen={isEditTaskSidebarOpen}
                                       onCancelled={onTaskEditionCancelled} onTaskSaved={onTaskSaved}
-                                      onTaskDeleted={onTaskDeleted} taskModel={editTaskModalModel}/>
+                                      taskModel={editTaskModalModel}/>
             <DeleteMessageModalComponent isOpen={deleteTaskModalParams.isOpen} onCancelled={onTasksDeletingCancelled} onDeleted={onTasksDeleted} message={deleteTaskModalParams.message} title={deleteTaskModalParams.title} id={"deleteTaskModal"}/>
             <DeleteMessageModalComponent isOpen={deleteCategoryModalParams.isOpen} onCancelled={onCategoryDeletingCancelled} onDeleted={onCategoryDeleted} message={deleteCategoryModalParams.message} title={deleteCategoryModalParams.title} id={"deleteCategoryModal"}/>
             {
