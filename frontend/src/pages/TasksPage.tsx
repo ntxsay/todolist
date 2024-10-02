@@ -32,18 +32,20 @@ const TasksPage = () => {
         createdAt: "",
         updatedAt: ""
     };
-    const location = useLocation();
+    
     const navigate = useNavigate();
+    const location = useLocation();
     const path: string = location.pathname;
     const {id} = useParams<{ id: string }>();
     const [searchParams] = useSearchParams();
 
     const [headerTitle, setHeaderTitle] = useState<string>("");
     const [selectedId, setSelectedId] = useState<number[]>([]);
+    
     const [category, setCategory] = useState<ICategorySchema | null>(null);
-
-    const [editTaskModalModel, setEditTaskModalModel] = useState<ITaskSchema>(emptyTask);
     const [tasks, setTasks] = useState<ITaskSchema[]>([]);
+    const [editTaskModalModel, setEditTaskModalModel] = useState<ITaskSchema>(emptyTask);
+    
     const [isEditTaskSidebarOpen, setIsEditTaskSidebarOpen] = useState(false);
     const [deleteTaskModalParams, setDeleteTaskModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
     const [deleteCategoryModalParams, setDeleteCategoryModalParams] = useState<DeleteMessageModalProps>({isOpen: false, message: "", title: ""});
@@ -101,7 +103,7 @@ const TasksPage = () => {
                     console.error(error);
                 });
         }
-    }, [id, path , searchParams]);
+    }, [id, path, searchParams]);
 
     const onOpenCreateTaskSidebar = () => {
         setEditTaskModalModel(emptyTask);
@@ -132,33 +134,6 @@ const TasksPage = () => {
     const onTaskEditionCancelled = () => {
         setEditTaskModalModel(emptyTask);
         setIsEditTaskSidebarOpen(false);
-    }
-    
-    const onOpenDeleteCategoryModal = () => {
-        if (category === null)
-            return;
-        
-        setDeleteCategoryModalParams({isOpen: true, message: "Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action supprimera toutes les tâches liées.", title: "Suppression de catégorie"});
-    }
-    
-    const onCategoryDeleted = () => {
-        setDeleteCategoryModalParams({isOpen: false, message: "", title: ""});
-        if (category === null)
-            return;
-        
-        axios.delete(import.meta.env.VITE_API_URL + `/api/categories/${category.id}`)
-            .then((response) => {
-                if (response.status === 200) {
-                    navigate("/");
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
-    
-    const onCategoryDeletingCancelled = () => {
-        setDeleteCategoryModalParams({isOpen: false, message: "", title: ""});
     }
     
     const onOpenDeleteTaskModal = () => {
@@ -222,6 +197,33 @@ const TasksPage = () => {
     
     const onCategoryEditionCancelled = () => {
         setIsCategoryEditionModalOpen(false);
+    }
+
+    const onOpenDeleteCategoryModal = () => {
+        if (category === null)
+            return;
+
+        setDeleteCategoryModalParams({isOpen: true, message: "Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action supprimera toutes les tâches liées.", title: "Suppression de catégorie"});
+    }
+
+    const onCategoryDeleted = () => {
+        setDeleteCategoryModalParams({isOpen: false, message: "", title: ""});
+        if (category === null)
+            return;
+
+        axios.delete(import.meta.env.VITE_API_URL + `/api/categories/${category.id}`)
+            .then((response) => {
+                if (response.status === 200) {
+                    navigate("/");
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    const onCategoryDeletingCancelled = () => {
+        setDeleteCategoryModalParams({isOpen: false, message: "", title: ""});
     }
 
     return (
